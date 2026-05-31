@@ -2,19 +2,11 @@ research_agent:
   enabled_sources:
     hackernews: true
     github_trending: true
-    reddit: false
     devto: true
-    medium: false
-    arxiv: false
-    producthunt: false
-    stackoverflow: false
-    kaggle: false
-    pypi_stats: false
-    npm_trends: false
-    docker_hub: false
-    indie_hackers: false
-    twitter: false
-    coursera: false
+    medium: true
+    arxiv: true
+    stackoverflow: true
+    pypi: true
 
   target_roles:
     - "Data Engineer"
@@ -59,14 +51,6 @@ research_agent:
   update_frequency: "weekly"  # or "manual"
   schedule_time: "07:00"      # UTC
 
-  # Reddit subreddits to monitor
-  reddit_subreddits:
-    - "MachineLearning"
-    - "datascience"
-    - "learnprogramming"
-    - "webdev"
-    - "Python"
-
   # Dev.to tags to monitor
   devto_tags:
     - "machinelearning"
@@ -85,7 +69,13 @@ research_agent:
   api_limits:
     hackernews_stories: 30
     github_trending_repos: 25
-    reddit_posts_per_subreddit: 20
     devto_articles: 20
     medium_articles: 20
     arxiv_papers: 15
+    stackoverflow_questions: 20
+    pypi_packages: 25
+
+  # Database settings
+  database:
+    path: "landas.db"
+    track_history: true

@@ -13,15 +13,28 @@ class AIAnalyzer:
         self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
     def analyze_sources(
-        self, source_data: List[SourceData], target_roles: List[str], research_run_id: str
+        self, source_data: List[SourceData], target_roles: List[str], research_run_id: str,
+        previous_discoveries: List[dict] = None
     ) -> ResearchFinding:
         """Analyze aggregated source data and extract technologies, dependencies, insights"""
 
         data_summary = self._prepare_data_summary(source_data)
 
+        # Add context about previous discoveries
+        previous_context = ""
+        if previous_discoveries:
+            known_techs = [d["name"] for d in previous_discoveries[:50]]
+            previous_context = f"""
+
+PREVIOUSLY DISCOVERED TECHNOLOGIES (for context - identify NEW technologies not in this list):
+{', '.join(known_techs)}
+
+Focus on finding technologies NOT already in the above list, or provide updates on those that have significantly changed.
+"""
+
         prompt = f"""
 Analyze the following research data collected from multiple sources about technologies, trends, and resources relevant to {', '.join(target_roles)} roles.
-
+{previous_context}
 DATA COLLECTED:
 {data_summary}
 
