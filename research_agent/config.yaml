@@ -1,0 +1,91 @@
+research_agent:
+  enabled_sources:
+    hackernews: true
+    github_trending: true
+    reddit: false
+    devto: true
+    medium: false
+    arxiv: false
+    producthunt: false
+    stackoverflow: false
+    kaggle: false
+    pypi_stats: false
+    npm_trends: false
+    docker_hub: false
+    indie_hackers: false
+    twitter: false
+    coursera: false
+
+  target_roles:
+    - "Data Engineer"
+    - "AI Engineer"
+    - "ML Engineer"
+    - "Analytics Engineer"
+
+  keywords:
+    data_tech:
+      - dbt
+      - Apache Spark
+      - pandas
+      - SQL
+      - Snowflake
+      - BigQuery
+      - Delta Lake
+      - Polars
+      - DuckDB
+      - Airflow
+      - Kafka
+      - Presto
+      - Ray
+
+    ai_tech:
+      - LLMs
+      - RAG
+      - Vector Databases
+      - Transformers
+      - PyTorch
+      - TensorFlow
+      - JAX
+      - Anthropic
+      - OpenAI
+      - Hugging Face
+      - MLflow
+      - Weights & Biases
+      - LangChain
+      - LlamaIndex
+      - vLLM
+      - Ollama
+
+  update_frequency: "weekly"  # or "manual"
+  schedule_time: "07:00"      # UTC
+
+  # Reddit subreddits to monitor
+  reddit_subreddits:
+    - "MachineLearning"
+    - "datascience"
+    - "learnprogramming"
+    - "webdev"
+    - "Python"
+
+  # Dev.to tags to monitor
+  devto_tags:
+    - "machinelearning"
+    - "dataengineering"
+    - "python"
+    - "ai"
+    - "llm"
+
+  # ArXiv categories to monitor
+  arxiv_categories:
+    - "cs.AI"
+    - "cs.LG"
+    - "stat.ML"
+
+  # Limits for API calls
+  api_limits:
+    hackernews_stories: 30
+    github_trending_repos: 25
+    reddit_posts_per_subreddit: 20
+    devto_articles: 20
+    medium_articles: 20
+    arxiv_papers: 15
