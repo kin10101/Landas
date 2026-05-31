@@ -1,8 +1,11 @@
 import httpx
-from typing import List
+from typing import List, Optional, TYPE_CHECKING
 from datetime import datetime
 from .base import BaseSource
 from models import SourceData
+
+if TYPE_CHECKING:
+    from progress import ProgressCallback
 
 
 class HackerNewsSource(BaseSource):
@@ -10,8 +13,8 @@ class HackerNewsSource(BaseSource):
 
     BASE_URL = "https://hn.algolia.com/api/v1"
 
-    def __init__(self, enabled: bool = True, limit: int = 30):
-        super().__init__("HackerNews", enabled)
+    def __init__(self, enabled: bool = True, limit: int = 30, progress_callback: Optional["ProgressCallback"] = None):
+        super().__init__("HackerNews", enabled, progress_callback)
         self.limit = limit
 
     async def fetch(self) -> List[SourceData]:
@@ -19,13 +22,19 @@ class HackerNewsSource(BaseSource):
         if not self.enabled:
             return []
 
+        from progress import EventType
+        await self.emit_progress(EventType.SOURCE_STARTED, total_items=1, detail="Fetching stories")
+
         try:
             url = f"{self.BASE_URL}/search?query=AI%20OR%20data%20OR%20machine%20learning&tags=story&hitsPerPage={self.limit}"
             response = await self.client.get(url)
             response.raise_for_status()
             data = response.json()
 
-            for hit in data.get("hits", [])[:self.limit]:
+            hits = data.get("hits", [])[:self.limit]
+            total = len(hits)
+
+            for i, hit in enumerate(hits):
                 source_data = SourceData(
                     title=hit.get("title", ""),
                     description=hit.get("story_text", ""),
@@ -40,9 +49,19 @@ class HackerNewsSource(BaseSource):
                 )
                 self.data.append(source_data)
 
+                if (i + 1) % 10 == 0 or i == total - 1:
+                    await self.emit_progress(
+                        EventType.SOURCE_ITERATION,
+                        current=i + 1,
+                        total=total,
+                        detail=f"Processing stories"
+                    )
+
+            await self.emit_progress(EventType.SOURCE_COMPLETED, items_collected=len(self.data))
             print(f"[+] HackerNews: Fetched {len(self.data)} stories")
             return self.data
 
         except Exception as e:
+            await self.emit_progress(EventType.SOURCE_FAILED, error=str(e))
             print(f"[!] HackerNews Error: {str(e)}")
             return []

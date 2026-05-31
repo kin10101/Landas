@@ -50,7 +50,7 @@ const SkillNode = ({ node, onNodeClick, onStatusChange, level = 0 }) => {
           {/* Node Content */}
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className={`font-medium text-sm leading-tight ${node.level === 'role' ? 'text-white text-lg' : 'text-gray-800'}`}>
+              <h3 className={`font-medium text-sm leading-tight ${node.level === 'role' ? 'text-white text-lg' : 'text-slate-800'}`}>
                 {node.name}
               </h3>
               {node.level !== 'role' && (
@@ -62,7 +62,7 @@ const SkillNode = ({ node, onNodeClick, onStatusChange, level = 0 }) => {
               <button
                 onClick={handleToggle}
                 className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs
-                  ${node.level === 'role' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  ${node.level === 'role' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
               >
                 {isExpanded ? '−' : `+${node.children.length}`}
               </button>
@@ -71,24 +71,24 @@ const SkillNode = ({ node, onNodeClick, onStatusChange, level = 0 }) => {
 
           {/* Quick Status Buttons */}
           {node.level !== 'role' && (
-            <div className="flex gap-1 mt-2 pt-2 border-t border-gray-100">
+            <div className="flex gap-1 mt-2 pt-2 border-t border-slate-100">
               <button
                 onClick={(e) => handleStatusClick(e, 'completed')}
-                className={`flex-1 text-xs py-1 rounded transition-colors ${status === 'completed' ? 'bg-green-500 text-white' : 'bg-gray-100 hover:bg-green-100 text-gray-600'}`}
+                className={`flex-1 text-xs py-1 rounded transition-colors ${status === 'completed' ? 'bg-emerald-500 text-white' : 'bg-slate-100 hover:bg-emerald-100 text-slate-600'}`}
                 title="Mark as completed"
               >
                 ✓
               </button>
               <button
                 onClick={(e) => handleStatusClick(e, 'in_progress')}
-                className={`flex-1 text-xs py-1 rounded transition-colors ${status === 'in_progress' ? 'bg-amber-500 text-white' : 'bg-gray-100 hover:bg-amber-100 text-gray-600'}`}
+                className={`flex-1 text-xs py-1 rounded transition-colors ${status === 'in_progress' ? 'bg-blue-500 text-white' : 'bg-slate-100 hover:bg-blue-100 text-slate-600'}`}
                 title="Mark as in progress"
               >
                 →
               </button>
               <button
                 onClick={(e) => handleStatusClick(e, 'removed')}
-                className={`flex-1 text-xs py-1 rounded transition-colors ${status === 'removed' ? 'bg-gray-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+                className={`flex-1 text-xs py-1 rounded transition-colors ${status === 'removed' ? 'bg-slate-500 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'}`}
                 title="Remove from roadmap"
               >
                 ✕
@@ -98,7 +98,7 @@ const SkillNode = ({ node, onNodeClick, onStatusChange, level = 0 }) => {
 
           {/* Resource Count */}
           {node.resources && node.resources.length > 0 && (
-            <div className="text-xs text-blue-500 mt-1 flex items-center gap-1">
+            <div className="text-xs text-blue-600 mt-1 flex items-center gap-1">
               <span>📚</span>
               <span>{node.resources.length} resources</span>
             </div>

@@ -1,8 +1,11 @@
 import httpx
-from typing import List
+from typing import List, Optional, TYPE_CHECKING
 from datetime import datetime
 from .base import BaseSource
 from models import SourceData
+
+if TYPE_CHECKING:
+    from progress import ProgressCallback
 
 
 class PyPISource(BaseSource):
@@ -10,25 +13,18 @@ class PyPISource(BaseSource):
 
     BASE_URL = "https://pypi.org/pypi"
 
-    # Key packages to monitor for Data/AI roles
     PACKAGES = [
-        # ML/AI Frameworks
         "torch", "tensorflow", "jax", "scikit-learn", "xgboost", "lightgbm",
-        # LLM/NLP
         "transformers", "langchain", "llama-index", "openai", "anthropic",
         "sentence-transformers", "spacy", "nltk",
-        # Data Processing
         "pandas", "polars", "dask", "vaex", "modin",
-        # Vector DBs
         "chromadb", "pinecone-client", "weaviate-client", "qdrant-client",
-        # Data Engineering
         "apache-airflow", "prefect", "dagster", "dbt-core",
-        # Visualization
         "matplotlib", "plotly", "streamlit", "gradio",
     ]
 
-    def __init__(self, enabled: bool = True, limit: int = 25):
-        super().__init__("PyPI", enabled)
+    def __init__(self, enabled: bool = True, limit: int = 25, progress_callback: Optional["ProgressCallback"] = None):
+        super().__init__("PyPI", enabled, progress_callback)
         self.limit = limit
 
     async def fetch(self) -> List[SourceData]:
@@ -36,10 +32,21 @@ class PyPISource(BaseSource):
         if not self.enabled:
             return []
 
-        try:
-            packages_to_fetch = self.PACKAGES[:self.limit]
+        from progress import EventType
+        packages_to_fetch = self.PACKAGES[:self.limit]
+        total_packages = len(packages_to_fetch)
+        await self.emit_progress(EventType.SOURCE_STARTED, total_items=total_packages, detail="Fetching packages")
 
-            for package_name in packages_to_fetch:
+        try:
+            for i, package_name in enumerate(packages_to_fetch):
+                if (i + 1) % 5 == 0 or i == 0:
+                    await self.emit_progress(
+                        EventType.SOURCE_ITERATION,
+                        current=i + 1,
+                        total=total_packages,
+                        detail=f"Fetching {package_name}"
+                    )
+
                 try:
                     response = await self.client.get(f"{self.BASE_URL}/{package_name}/json")
 
@@ -51,7 +58,6 @@ class PyPISource(BaseSource):
 
                     info = data.get("info", {})
 
-                    # Get release date
                     releases = data.get("releases", {})
                     latest_version = info.get("version", "")
                     release_date = datetime.now()
@@ -85,12 +91,13 @@ class PyPISource(BaseSource):
                     self.data.append(source_data)
 
                 except Exception as e:
-                    # Skip packages that fail
                     continue
 
+            await self.emit_progress(EventType.SOURCE_COMPLETED, items_collected=len(self.data))
             print(f"[+] PyPI: Fetched {len(self.data)} packages")
             return self.data
 
         except Exception as e:
+            await self.emit_progress(EventType.SOURCE_FAILED, error=str(e))
             print(f"[!] PyPI Error: {str(e)}")
             return []

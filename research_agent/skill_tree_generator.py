@@ -21,18 +21,22 @@ except ImportError:
 class SkillTreeGenerator:
     """Generates complete skill trees for career roles"""
 
-    def __init__(self, db: Database):
+    def __init__(self, db: Database, user_id: int = 1):
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         self.db = db
+        self.user_id = user_id
 
-    def generate_tree(self, role: str) -> int:
+    def generate_tree(self, role: str, user_id: int = None) -> int:
         """Generate a complete skill tree for a role
 
         Returns:
             Root node ID of the generated tree
         """
-        print(f"\n[*] Generating skill tree for: {role}")
+        if user_id is None:
+            user_id = self.user_id
+
+        print(f"\n[*] Generating skill tree for: {role} (user_id={user_id})")
 
         # Generate the tree structure with OpenAI
         tree_structure = self._generate_structure(role)
@@ -42,7 +46,7 @@ class SkillTreeGenerator:
             return None
 
         # Save to database
-        root_id = self._save_tree_to_db(tree_structure, role)
+        root_id = self._save_tree_to_db(tree_structure, role, user_id)
 
         print(f"[+] Skill tree generated with root ID: {root_id}")
         return root_id
@@ -129,7 +133,7 @@ Generate the tree for: {role}
             print(f"[!] Error generating tree structure: {str(e)}")
             return None
 
-    def _save_tree_to_db(self, tree: dict, role: str) -> int:
+    def _save_tree_to_db(self, tree: dict, role: str, user_id: int) -> int:
         """Save generated tree to database"""
 
         # Create root node (role)
@@ -139,7 +143,8 @@ Generate the tree for: {role}
             level=NodeLevel.ROLE,
             difficulty=1,
             relevance_score=1.0,
-            trend=TrendDirection.STABLE
+            trend=TrendDirection.STABLE,
+            user_id=user_id
         )
         root_id = self.db.create_skill_node(root)
 
@@ -152,7 +157,8 @@ Generate the tree for: {role}
                 parent_id=root_id,
                 difficulty=cat.get("difficulty", 2),
                 relevance_score=0.8,
-                trend=TrendDirection.STABLE
+                trend=TrendDirection.STABLE,
+                user_id=user_id
             )
             cat_id = self.db.create_skill_node(cat_node)
 
@@ -165,7 +171,8 @@ Generate the tree for: {role}
                     parent_id=cat_id,
                     difficulty=skill.get("difficulty", 3),
                     relevance_score=0.7,
-                    trend=TrendDirection.STABLE
+                    trend=TrendDirection.STABLE,
+                    user_id=user_id
                 )
                 skill_id = self.db.create_skill_node(skill_node)
 
@@ -192,7 +199,8 @@ Generate the tree for: {role}
                         parent_id=skill_id,
                         difficulty=subskill.get("difficulty", 4),
                         relevance_score=0.6,
-                        trend=TrendDirection.STABLE
+                        trend=TrendDirection.STABLE,
+                        user_id=user_id
                     )
                     sub_id = self.db.create_skill_node(sub_node)
 
@@ -212,15 +220,18 @@ Generate the tree for: {role}
 
         return root_id
 
-    def enrich_with_research(self, root_id: int, discoveries: List[dict]):
+    def enrich_with_research(self, root_id: int, discoveries: List[dict], user_id: int = None):
         """Enrich existing tree with research discoveries
 
         Adds new technologies and resources found by research agent
         """
+        if user_id is None:
+            user_id = self.user_id
+
         print(f"\n[*] Enriching skill tree with {len(discoveries)} discoveries...")
 
         # Get the tree
-        tree = self.db.get_full_tree(root_id)
+        tree = self.db.get_full_tree(root_id, user_id)
         if not tree:
             print("[!] Tree not found")
             return
@@ -262,9 +273,9 @@ Generate the tree for: {role}
         search_and_add(tree)
 
 
-def generate_default_trees(db: Database):
+def generate_default_trees(db: Database, user_id: int = 1):
     """Generate default skill trees for common roles"""
-    generator = SkillTreeGenerator(db)
+    generator = SkillTreeGenerator(db, user_id=user_id)
 
     default_roles = [
         "AI Engineer",
@@ -274,12 +285,12 @@ def generate_default_trees(db: Database):
     ]
 
     for role in default_roles:
-        # Check if role already exists
-        existing = db.get_root_nodes()
+        # Check if role already exists for this user
+        existing = db.get_root_nodes(user_id)
         if any(n["name"] == role for n in existing):
-            print(f"[*] Skill tree for '{role}' already exists, skipping...")
+            print(f"[*] Skill tree for '{role}' already exists for user {user_id}, skipping...")
             continue
 
-        generator.generate_tree(role)
+        generator.generate_tree(role, user_id)
 
-    return db.get_root_nodes()
+    return db.get_root_nodes(user_id)

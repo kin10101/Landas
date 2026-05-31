@@ -4,23 +4,65 @@
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #213547;
-  background-color: #f8fafc;
+  color: #1E293B;
+  background-color: #F8FAFC;
+  --tree-zoom: 1;
+
+  /* Landas Brand Colors - Tech Blue */
+  --landas-primary: #3B82F6;
+  --landas-primary-light: #60A5FA;
+  --landas-primary-dark: #2563EB;
+  --landas-accent: #0EA5E9;
+  --landas-accent-glow: #DBEAFE;
+  --landas-slate: #64748B;
+  --landas-slate-light: #94A3B8;
+  --landas-cool-white: #F8FAFC;
+  --landas-cool-gray: #F1F5F9;
+  --landas-text: #1E293B;
+  --landas-text-light: #475569;
+  --landas-success: #10B981;
+  --landas-warning: #F59E0B;
+  --landas-progress: #3B82F6;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 #root {
   min-height: 100vh;
 }
 
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--landas-primary);
+  outline-offset: 2px;
+}
+
 /* Skill Tree Styles */
 .skill-tree {
   position: relative;
   padding: 2rem;
+  transform-origin: top center;
+  transform: scale(var(--tree-zoom, 1));
+  transition: transform 0.2s ease-out;
+}
+
+.skill-tree-container {
+  overflow: auto;
+  position: relative;
+  min-height: calc(100vh - 200px);
+}
+
+.skill-tree-container.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.skill-tree-container:not(.dragging) {
+  cursor: grab;
 }
 
 .tree-node {
@@ -36,53 +78,55 @@ body {
 .node-card {
   background: white;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  border: 2px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgb(100 116 139 / 0.1);
+  border: 2px solid #CBD5E1;
   padding: 0.75rem;
   min-width: 180px;
   max-width: 220px;
 }
 
 .node-card.active {
-  border-color: #3b82f6;
+  border-color: var(--landas-primary);
+  box-shadow: 0 4px 12px -1px rgb(59 130 246 / 0.15);
 }
 
 .node-card.completed {
-  border-color: #22c55e;
-  background: #f0fdf4;
+  border-color: var(--landas-success);
+  background: #F7FEE7;
 }
 
 .node-card.in_progress {
-  border-color: #f59e0b;
-  background: #fffbeb;
+  border-color: var(--landas-progress);
+  background: #FFF7ED;
 }
 
 .node-card.removed {
-  border-color: #9ca3af;
-  background: #f3f4f6;
+  border-color: var(--landas-slate-light);
+  background: var(--landas-cool-gray);
   opacity: 0.5;
 }
 
 /* Level-specific styles */
 .level-role .node-card {
-  background: linear-gradient(to right, #2563eb, #7c3aed);
+  background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #60A5FA 100%);
   color: white;
   border: none;
   min-width: 250px;
+  box-shadow: 0 8px 16px -4px rgb(59 130 246 / 0.3);
 }
 
 .level-category .node-card {
-  border-color: #60a5fa;
-  background: #eff6ff;
+  border-color: var(--landas-primary-light);
+  background: #EFF6FF;
 }
 
 .level-skill .node-card {
-  border-color: #cbd5e1;
+  border-color: #CBD5E1;
 }
 
 .level-subskill .node-card {
-  border-color: #e2e8f0;
-  background: #f8fafc;
+  border-color: #E2E8F0;
+  background: var(--landas-cool-gray);
   font-size: 0.875rem;
 }
 
@@ -122,16 +166,16 @@ body {
 }
 
 .progress-badge.completed {
-  background: #22c55e;
+  background: var(--landas-success);
 }
 
 .progress-badge.in-progress {
-  background: #f59e0b;
+  background: var(--landas-progress);
 }
 
 /* Difficulty Stars */
 .difficulty-stars {
-  color: #f59e0b;
+  color: var(--landas-warning);
   font-size: 0.75rem;
 }
 
@@ -168,17 +212,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--landas-cool-gray);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--landas-slate-light);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--landas-slate);
 }
 
 /* Animations */
@@ -187,6 +231,132 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideInFromBottom 0.3s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .resource-panel {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .node-card {
+    min-width: 150px;
+    max-width: 180px;
+    padding: 0.5rem;
+  }
+
+  .level-role .node-card {
+    min-width: 200px;
+  }
+
+  .tree-children {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .skill-tree {
+    padding: 1rem;
+  }
+
+  .resource-panel {
+    width: 100%;
+    max-width: 100%;
+    height: 80vh;
+    top: auto;
+    bottom: 0;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+  }
+
+  .resource-panel.hidden {
+    transform: translateY(100%);
+  }
+
+  .node-card {
+    min-width: 120px;
+    max-width: 150px;
+    font-size: 0.8rem;
+  }
+
+  .level-role .node-card {
+    min-width: 160px;
+  }
+
+  .tree-branch {
+    padding-top: 1rem;
+  }
+
+  .tree-children {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .node-card {
+    min-width: 100px;
+    max-width: 130px;
+  }
+
+  .level-role .node-card {
+    min-width: 140px;
+  }
+
+  .difficulty-stars {
+    font-size: 0.6rem;
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Keyboard navigation highlight */
+.node-card:focus-within {
+  ring: 2px;
+  ring-color: var(--landas-primary);
+  ring-offset: 2px;
+}
+
+[data-focused="true"] .node-card {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
 }

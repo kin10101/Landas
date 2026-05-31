@@ -1,5 +1,7 @@
 import json
 import os
+from datetime import datetime
+from pathlib import Path
 from typing import List
 from openai import OpenAI
 from models import SourceData, ResearchFinding, EmergingTechnology, EstablishedTechnology, ResearchInsights, ResearchRunSummary
@@ -8,9 +10,13 @@ from models import SourceData, ResearchFinding, EmergingTechnology, EstablishedT
 class AIAnalyzer:
     """Analyzes raw source data using OpenAI API to extract meaningful insights"""
 
-    def __init__(self):
+    def __init__(self, debug: bool = False):
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        self.debug = debug
+        self.debug_dir = Path(__file__).parent / "debug"
+        if self.debug:
+            self.debug_dir.mkdir(exist_ok=True)
 
     def analyze_sources(
         self, source_data: List[SourceData], target_roles: List[str], research_run_id: str,
@@ -111,6 +117,33 @@ Return your analysis as valid JSON following this structure. IMPORTANT: Use ONLY
 Be comprehensive but concise. Focus on practical, actionable insights.
 """
 
+        # Debug: save prompt to file
+        if self.debug:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            debug_file = self.debug_dir / f"ai_input_{timestamp}.txt"
+            with open(debug_file, "w", encoding="utf-8") as f:
+                f.write("=" * 80 + "\n")
+                f.write("AI ANALYZER INPUT\n")
+                f.write("=" * 80 + "\n\n")
+                f.write(f"Timestamp: {timestamp}\n")
+                f.write(f"Model: {self.model}\n")
+                f.write(f"Source items: {len(source_data)}\n")
+                f.write(f"Target roles: {target_roles}\n\n")
+                f.write("=" * 80 + "\n")
+                f.write("RAW SOURCE DATA\n")
+                f.write("=" * 80 + "\n\n")
+                for item in source_data:
+                    f.write(f"Source: {item.source}\n")
+                    f.write(f"Title: {item.title}\n")
+                    f.write(f"URL: {item.url}\n")
+                    f.write(f"Description: {item.description}\n")
+                    f.write("-" * 40 + "\n")
+                f.write("\n" + "=" * 80 + "\n")
+                f.write("PROMPT SENT TO AI\n")
+                f.write("=" * 80 + "\n\n")
+                f.write(prompt)
+            print(f"[DEBUG] Saved AI input to: {debug_file}")
+
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -121,6 +154,21 @@ Be comprehensive but concise. Focus on practical, actionable insights.
 
             # Extract text from response
             analysis_text = response.choices[0].message.content
+
+            # Debug: save response to file
+            if self.debug:
+                response_file = self.debug_dir / f"ai_output_{timestamp}.txt"
+                with open(response_file, "w", encoding="utf-8") as f:
+                    f.write("=" * 80 + "\n")
+                    f.write("AI ANALYZER OUTPUT\n")
+                    f.write("=" * 80 + "\n\n")
+                    f.write(f"Timestamp: {timestamp}\n")
+                    f.write(f"Model: {self.model}\n\n")
+                    f.write("=" * 80 + "\n")
+                    f.write("RAW RESPONSE\n")
+                    f.write("=" * 80 + "\n\n")
+                    f.write(analysis_text)
+                print(f"[DEBUG] Saved AI output to: {response_file}")
 
             analysis_json = self._extract_json(analysis_text)
 

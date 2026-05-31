@@ -1,8 +1,11 @@
 import httpx
-from typing import List
+from typing import List, Optional, TYPE_CHECKING
 from datetime import datetime
 from .base import BaseSource
 from models import SourceData
+
+if TYPE_CHECKING:
+    from progress import ProgressCallback
 
 
 class DevToSource(BaseSource):
@@ -10,8 +13,8 @@ class DevToSource(BaseSource):
 
     BASE_URL = "https://dev.to/api/articles"
 
-    def __init__(self, enabled: bool = True, limit: int = 20):
-        super().__init__("Dev.to", enabled)
+    def __init__(self, enabled: bool = True, limit: int = 20, progress_callback: Optional["ProgressCallback"] = None):
+        super().__init__("Dev.to", enabled, progress_callback)
         self.limit = limit
         self.tags = ["machinelearning", "dataengineering", "python", "ai", "llm"]
 
@@ -20,12 +23,23 @@ class DevToSource(BaseSource):
         if not self.enabled:
             return []
 
+        from progress import EventType
+        total_tags = len(self.tags)
+        await self.emit_progress(EventType.SOURCE_STARTED, total_items=total_tags, detail="Fetching articles")
+
         try:
-            for tag in self.tags:
+            for i, tag in enumerate(self.tags):
+                await self.emit_progress(
+                    EventType.SOURCE_ITERATION,
+                    current=i + 1,
+                    total=total_tags,
+                    detail=f"Fetching #{tag}"
+                )
+
                 params = {
                     "tag": tag,
                     "per_page": self.limit // len(self.tags),
-                    "top": 7,  # Last 7 days
+                    "top": 7,
                 }
 
                 response = await self.client.get(self.BASE_URL, params=params)
@@ -50,9 +64,11 @@ class DevToSource(BaseSource):
                     )
                     self.data.append(source_data)
 
+            await self.emit_progress(EventType.SOURCE_COMPLETED, items_collected=len(self.data))
             print(f"[+] Dev.to: Fetched {len(self.data)} articles")
             return self.data
 
         except Exception as e:
+            await self.emit_progress(EventType.SOURCE_FAILED, error=str(e))
             print(f"[!] Dev.to Error: {str(e)}")
             return []

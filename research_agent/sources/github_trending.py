@@ -1,9 +1,12 @@
 import httpx
-from typing import List
+from typing import List, Optional, TYPE_CHECKING
 from datetime import datetime
 from bs4 import BeautifulSoup
 from .base import BaseSource
 from models import SourceData
+
+if TYPE_CHECKING:
+    from progress import ProgressCallback
 
 
 class GitHubTrendingSource(BaseSource):
@@ -11,8 +14,8 @@ class GitHubTrendingSource(BaseSource):
 
     BASE_URL = "https://github.com/trending"
 
-    def __init__(self, enabled: bool = True, limit: int = 25):
-        super().__init__("GitHub", enabled)
+    def __init__(self, enabled: bool = True, limit: int = 25, progress_callback: Optional["ProgressCallback"] = None):
+        super().__init__("GitHub", enabled, progress_callback)
         self.limit = limit
         self.languages = ["python", "javascript", "go", "rust"]
 
@@ -21,8 +24,19 @@ class GitHubTrendingSource(BaseSource):
         if not self.enabled:
             return []
 
+        from progress import EventType
+        total_langs = len(self.languages)
+        await self.emit_progress(EventType.SOURCE_STARTED, total_items=total_langs, detail="Fetching trending repos")
+
         try:
-            for lang in self.languages:
+            for i, lang in enumerate(self.languages):
+                await self.emit_progress(
+                    EventType.SOURCE_ITERATION,
+                    current=i + 1,
+                    total=total_langs,
+                    detail=f"Fetching {lang} repos"
+                )
+
                 url = f"{self.BASE_URL}?language={lang}&since=weekly"
                 response = await self.client.get(url)
                 response.raise_for_status()
@@ -66,9 +80,11 @@ class GitHubTrendingSource(BaseSource):
                         print(f"  Warning: Could not parse repo: {str(e)}")
                         continue
 
+            await self.emit_progress(EventType.SOURCE_COMPLETED, items_collected=len(self.data))
             print(f"[+] GitHub: Fetched {len(self.data)} trending repos")
             return self.data
 
         except Exception as e:
+            await self.emit_progress(EventType.SOURCE_FAILED, error=str(e))
             print(f"[!] GitHub Error: {str(e)}")
             return []
