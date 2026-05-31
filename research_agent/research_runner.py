@@ -5,17 +5,31 @@ from typing import List, Tuple
 from datetime import datetime
 import yaml
 
-from sources.hackernews import HackerNewsSource
-from sources.github_trending import GitHubTrendingSource
-from sources.devto import DevToSource
-from sources.medium import MediumSource
-from sources.arxiv import ArXivSource
-from sources.stackoverflow import StackOverflowSource
-from sources.pypi import PyPISource
-from models import SourceData
-from ai_analyzer import AIAnalyzer
-from output_formatter import OutputFormatter
-from database import Database
+# Handle imports for both direct execution and import from other modules
+try:
+    from .sources.hackernews import HackerNewsSource
+    from .sources.github_trending import GitHubTrendingSource
+    from .sources.devto import DevToSource
+    from .sources.medium import MediumSource
+    from .sources.arxiv import ArXivSource
+    from .sources.stackoverflow import StackOverflowSource
+    from .sources.pypi import PyPISource
+    from .models import SourceData
+    from .ai_analyzer import AIAnalyzer
+    from .output_formatter import OutputFormatter
+    from .database import Database
+except ImportError:
+    from sources.hackernews import HackerNewsSource
+    from sources.github_trending import GitHubTrendingSource
+    from sources.devto import DevToSource
+    from sources.medium import MediumSource
+    from sources.arxiv import ArXivSource
+    from sources.stackoverflow import StackOverflowSource
+    from sources.pypi import PyPISource
+    from models import SourceData
+    from ai_analyzer import AIAnalyzer
+    from output_formatter import OutputFormatter
+    from database import Database
 
 
 class ResearchRunner:

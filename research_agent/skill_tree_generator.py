@@ -7,9 +7,15 @@ Tree structure: Role -> Category -> Skill -> SubSkill (4 levels)
 
 import json
 import os
+import sys
 from typing import List, Optional
 from openai import OpenAI
-from database import Database, SkillNodeCreate, ResourceCreate, NodeLevel, TrendDirection
+
+# Handle imports for both direct execution and import from other modules
+try:
+    from .database import Database, SkillNodeCreate, ResourceCreate, NodeLevel, TrendDirection
+except ImportError:
+    from database import Database, SkillNodeCreate, ResourceCreate, NodeLevel, TrendDirection
 
 
 class SkillTreeGenerator:

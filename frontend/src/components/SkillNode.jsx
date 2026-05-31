@@ -29,7 +29,12 @@ const SkillNode = ({ node, onNodeClick, onStatusChange, level = 0 }) => {
 
   return (
     <div className={`tree-branch animate-fade-in`} style={{ animationDelay: `${level * 50}ms` }}>
-      <div className={`tree-node ${levelClass}`}>
+      <div
+        className={`tree-node ${levelClass}`}
+        data-node-id={node.id}
+        data-parent-id={node.parent_id || ''}
+        data-status={status}
+      >
         <div
           className={`node-card ${statusClass} relative`}
           onClick={handleClick}
@@ -59,7 +64,7 @@ const SkillNode = ({ node, onNodeClick, onStatusChange, level = 0 }) => {
                 className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs
                   ${node.level === 'role' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
-                {isExpanded ? '−' : '+'}
+                {isExpanded ? '−' : `+${node.children.length}`}
               </button>
             )}
           </div>
@@ -69,21 +74,21 @@ const SkillNode = ({ node, onNodeClick, onStatusChange, level = 0 }) => {
             <div className="flex gap-1 mt-2 pt-2 border-t border-gray-100">
               <button
                 onClick={(e) => handleStatusClick(e, 'completed')}
-                className={`flex-1 text-xs py-1 rounded ${status === 'completed' ? 'bg-green-500 text-white' : 'bg-gray-100 hover:bg-green-100'}`}
+                className={`flex-1 text-xs py-1 rounded transition-colors ${status === 'completed' ? 'bg-green-500 text-white' : 'bg-gray-100 hover:bg-green-100 text-gray-600'}`}
                 title="Mark as completed"
               >
                 ✓
               </button>
               <button
                 onClick={(e) => handleStatusClick(e, 'in_progress')}
-                className={`flex-1 text-xs py-1 rounded ${status === 'in_progress' ? 'bg-amber-500 text-white' : 'bg-gray-100 hover:bg-amber-100'}`}
+                className={`flex-1 text-xs py-1 rounded transition-colors ${status === 'in_progress' ? 'bg-amber-500 text-white' : 'bg-gray-100 hover:bg-amber-100 text-gray-600'}`}
                 title="Mark as in progress"
               >
                 →
               </button>
               <button
                 onClick={(e) => handleStatusClick(e, 'removed')}
-                className={`flex-1 text-xs py-1 rounded ${status === 'removed' ? 'bg-gray-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+                className={`flex-1 text-xs py-1 rounded transition-colors ${status === 'removed' ? 'bg-gray-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
                 title="Remove from roadmap"
               >
                 ✕
@@ -93,8 +98,9 @@ const SkillNode = ({ node, onNodeClick, onStatusChange, level = 0 }) => {
 
           {/* Resource Count */}
           {node.resources && node.resources.length > 0 && (
-            <div className="text-xs text-blue-500 mt-1">
-              📚 {node.resources.length} resources
+            <div className="text-xs text-blue-500 mt-1 flex items-center gap-1">
+              <span>📚</span>
+              <span>{node.resources.length} resources</span>
             </div>
           )}
         </div>
@@ -103,15 +109,17 @@ const SkillNode = ({ node, onNodeClick, onStatusChange, level = 0 }) => {
       {/* Children */}
       {hasChildren && isExpanded && (
         <div className="tree-children">
-          {node.children.map((child) => (
-            <SkillNode
-              key={child.id}
-              node={child}
-              onNodeClick={onNodeClick}
-              onStatusChange={onStatusChange}
-              level={level + 1}
-            />
-          ))}
+          {node.children
+            .filter(child => child.progress?.status !== 'removed')
+            .map((child) => (
+              <SkillNode
+                key={child.id}
+                node={child}
+                onNodeClick={onNodeClick}
+                onStatusChange={onStatusChange}
+                level={level + 1}
+              />
+            ))}
         </div>
       )}
     </div>
