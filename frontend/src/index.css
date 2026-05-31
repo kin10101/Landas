@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #213547;
+  background-color: #f8fafc;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Skill Tree Styles */
+.skill-tree {
+  position: relative;
+  padding: 2rem;
+}
+
+.tree-node {
+  position: relative;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.tree-node:hover {
+  transform: scale(1.02);
+}
+
+.node-card {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  border: 2px solid #e5e7eb;
+  padding: 0.75rem;
+  min-width: 180px;
+  max-width: 220px;
+}
+
+.node-card.active {
+  border-color: #3b82f6;
+}
+
+.node-card.completed {
+  border-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.node-card.in_progress {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.node-card.removed {
+  border-color: #9ca3af;
+  background: #f3f4f6;
+  opacity: 0.5;
+}
+
+/* Level-specific styles */
+.level-role .node-card {
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+  color: white;
+  border: none;
+  min-width: 250px;
+}
+
+.level-category .node-card {
+  border-color: #60a5fa;
+  background: #eff6ff;
+}
+
+.level-skill .node-card {
+  border-color: #cbd5e1;
+}
+
+.level-subskill .node-card {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  font-size: 0.875rem;
+}
+
+/* Resource Panel */
+.resource-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 24rem;
+  background: white;
+  box-shadow: -10px 0 30px rgb(0 0 0 / 0.1);
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+.resource-panel.hidden {
+  transform: translateX(100%);
+}
+
+/* Progress Badge */
+.progress-badge {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.progress-badge.completed {
+  background: #22c55e;
+}
+
+.progress-badge.in-progress {
+  background: #f59e0b;
+}
+
+/* Difficulty Stars */
+.difficulty-stars {
+  color: #f59e0b;
+  font-size: 0.75rem;
+}
+
+/* Tree Layout */
+.tree-level {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tree-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tree-children {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid #e2e8f0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}

@@ -1,0 +1,973 @@
+{
+  "id": 1,
+  "name": "AI Engineer",
+  "description": "An AI Engineer is responsible for designing, developing, and deploying artificial intelligence models and systems to solve complex problems and enhance technology applications.",
+  "level": "role",
+  "parent_id": null,
+  "difficulty": 1,
+  "relevance_score": 1.0,
+  "trend": "stable",
+  "position_x": 0.0,
+  "position_y": 0.0,
+  "created_at": "2026-05-31 08:14:14",
+  "updated_at": "2026-05-31 08:14:14",
+  "children": [
+    {
+      "id": 2,
+      "name": "Machine Learning",
+      "description": "Fundamental techniques and algorithms for teaching computers to learn from data.",
+      "level": "category",
+      "parent_id": 1,
+      "difficulty": 3,
+      "relevance_score": 0.8,
+      "trend": "stable",
+      "position_x": 0.0,
+      "position_y": 0.0,
+      "created_at": "2026-05-31 08:14:14",
+      "updated_at": "2026-05-31 08:14:14",
+      "children": [
+        {
+          "id": 3,
+          "name": "Supervised Learning",
+          "description": "Understanding algorithms that learn from labeled data to make predictions.",
+          "level": "skill",
+          "parent_id": 2,
+          "difficulty": 3,
+          "relevance_score": 0.7,
+          "trend": "stable",
+          "position_x": 0.0,
+          "position_y": 0.0,
+          "created_at": "2026-05-31 08:14:14",
+          "updated_at": "2026-05-31 08:14:14",
+          "children": [
+            {
+              "id": 4,
+              "name": "Regression Techniques",
+              "description": "Techniques to predict continuous outcomes based on input features.",
+              "level": "subskill",
+              "parent_id": 3,
+              "difficulty": 3,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 3,
+                  "skill_node_id": 4,
+                  "title": "Linear Regression - YouTube",
+                  "url": "https://www.youtube.com/watch?v=ZkjP5RJLQF0",
+                  "resource_type": "video",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                },
+                {
+                  "id": 4,
+                  "skill_node_id": 4,
+                  "title": "Regression Analysis - Wikipedia",
+                  "url": "https://en.wikipedia.org/wiki/Regression_analysis",
+                  "resource_type": "docs",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            },
+            {
+              "id": 5,
+              "name": "Classification Algorithms",
+              "description": "Techniques to categorize data into predefined classes.",
+              "level": "subskill",
+              "parent_id": 3,
+              "difficulty": 3,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 5,
+                  "skill_node_id": 5,
+                  "title": "Classification Algorithms - Towards Data Science",
+                  "url": "https://towardsdatascience.com/classification-algorithms-in-machine-learning-3c2f776e2125",
+                  "resource_type": "article",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            }
+          ],
+          "resources": [
+            {
+              "id": 1,
+              "skill_node_id": 3,
+              "title": "Supervised Learning - Coursera",
+              "url": "https://www.coursera.org/learn/machine-learning",
+              "resource_type": "video",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            },
+            {
+              "id": 2,
+              "skill_node_id": 3,
+              "title": "Supervised Learning - Scikit-learn Documentation",
+              "url": "https://scikit-learn.org/stable/supervised_learning.html",
+              "resource_type": "docs",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            }
+          ],
+          "progress": null
+        },
+        {
+          "id": 6,
+          "name": "Unsupervised Learning",
+          "description": "Techniques for finding hidden patterns in unlabeled data.",
+          "level": "skill",
+          "parent_id": 2,
+          "difficulty": 4,
+          "relevance_score": 0.7,
+          "trend": "stable",
+          "position_x": 0.0,
+          "position_y": 0.0,
+          "created_at": "2026-05-31 08:14:14",
+          "updated_at": "2026-05-31 08:14:14",
+          "children": [
+            {
+              "id": 7,
+              "name": "Clustering Techniques",
+              "description": "Methods for grouping data points based on similarity.",
+              "level": "subskill",
+              "parent_id": 6,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 8,
+                  "skill_node_id": 7,
+                  "title": "Clustering in Machine Learning - Towards Data Science",
+                  "url": "https://towardsdatascience.com/clustering-in-machine-learning-5d0953b8f0c",
+                  "resource_type": "article",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            },
+            {
+              "id": 8,
+              "name": "Dimensionality Reduction",
+              "description": "Techniques for reducing the number of features in a dataset.",
+              "level": "subskill",
+              "parent_id": 6,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 9,
+                  "skill_node_id": 8,
+                  "title": "Dimensionality Reduction Techniques - Medium",
+                  "url": "https://medium.com/@mohit_92694/dimensionality-reduction-techniques-a-comprehensive-overview-b42e856b8208",
+                  "resource_type": "article",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            }
+          ],
+          "resources": [
+            {
+              "id": 6,
+              "skill_node_id": 6,
+              "title": "Unsupervised Learning - Coursera",
+              "url": "https://www.coursera.org/learn/unsupervised-learning",
+              "resource_type": "video",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            },
+            {
+              "id": 7,
+              "skill_node_id": 6,
+              "title": "Unsupervised Learning - Scikit-learn Documentation",
+              "url": "https://scikit-learn.org/stable/unsupervised_learning.html",
+              "resource_type": "docs",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            }
+          ],
+          "progress": null
+        }
+      ],
+      "resources": [],
+      "progress": null
+    },
+    {
+      "id": 9,
+      "name": "Deep Learning",
+      "description": "Advanced AI techniques using neural networks to model complex patterns in large datasets.",
+      "level": "category",
+      "parent_id": 1,
+      "difficulty": 4,
+      "relevance_score": 0.8,
+      "trend": "stable",
+      "position_x": 0.0,
+      "position_y": 0.0,
+      "created_at": "2026-05-31 08:14:14",
+      "updated_at": "2026-05-31 08:14:14",
+      "children": [
+        {
+          "id": 10,
+          "name": "Neural Networks",
+          "description": "Understanding the architecture and functioning of neural networks.",
+          "level": "skill",
+          "parent_id": 9,
+          "difficulty": 4,
+          "relevance_score": 0.7,
+          "trend": "stable",
+          "position_x": 0.0,
+          "position_y": 0.0,
+          "created_at": "2026-05-31 08:14:14",
+          "updated_at": "2026-05-31 08:14:14",
+          "children": [
+            {
+              "id": 11,
+              "name": "Convolutional Neural Networks (CNNs)",
+              "description": "Specialized neural networks designed for processing structured grid data such as images.",
+              "level": "subskill",
+              "parent_id": 10,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 12,
+                  "skill_node_id": 11,
+                  "title": "Convolutional Neural Networks - Stanford CS231n",
+                  "url": "http://cs231n.stanford.edu/",
+                  "resource_type": "course",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            },
+            {
+              "id": 12,
+              "name": "Recurrent Neural Networks (RNNs)",
+              "description": "Neural networks designed for sequence prediction problems.",
+              "level": "subskill",
+              "parent_id": 10,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 13,
+                  "skill_node_id": 12,
+                  "title": "Understanding LSTM Networks - Colah's Blog",
+                  "url": "https://colah.github.io/posts/2015-08-Understanding-LSTMs/",
+                  "resource_type": "article",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            }
+          ],
+          "resources": [
+            {
+              "id": 10,
+              "skill_node_id": 10,
+              "title": "Neural Networks and Deep Learning - Coursera",
+              "url": "https://www.coursera.org/learn/neural-networks-deep-learning",
+              "resource_type": "video",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            },
+            {
+              "id": 11,
+              "skill_node_id": 10,
+              "title": "Neural Networks - DeepLearning.ai",
+              "url": "https://www.deeplearning.ai/neural-networks-and-deep-learning/",
+              "resource_type": "docs",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            }
+          ],
+          "progress": null
+        },
+        {
+          "id": 13,
+          "name": "Natural Language Processing (NLP)",
+          "description": "Techniques for processing and analyzing human language data.",
+          "level": "skill",
+          "parent_id": 9,
+          "difficulty": 4,
+          "relevance_score": 0.7,
+          "trend": "stable",
+          "position_x": 0.0,
+          "position_y": 0.0,
+          "created_at": "2026-05-31 08:14:14",
+          "updated_at": "2026-05-31 08:14:14",
+          "children": [
+            {
+              "id": 14,
+              "name": "Text Classification",
+              "description": "Categorizing text into predefined labels.",
+              "level": "subskill",
+              "parent_id": 13,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 16,
+                  "skill_node_id": 14,
+                  "title": "Text Classification in NLP - Towards Data Science",
+                  "url": "https://towardsdatascience.com/text-classification-in-nlp-using-bert-d1a5cbf99f9e",
+                  "resource_type": "article",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            },
+            {
+              "id": 15,
+              "name": "Named Entity Recognition (NER)",
+              "description": "Identifying and classifying key entities in text.",
+              "level": "subskill",
+              "parent_id": 13,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 17,
+                  "skill_node_id": 15,
+                  "title": "NER with spaCy - spaCy Documentation",
+                  "url": "https://spacy.io/usage/linguistic-features#named-entities",
+                  "resource_type": "docs",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            }
+          ],
+          "resources": [
+            {
+              "id": 14,
+              "skill_node_id": 13,
+              "title": "Natural Language Processing with Deep Learning - Coursera",
+              "url": "https://www.coursera.org/specializations/natural-language-processing",
+              "resource_type": "video",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            },
+            {
+              "id": 15,
+              "skill_node_id": 13,
+              "title": "NLP with Transformers - Hugging Face",
+              "url": "https://huggingface.co/transformers/",
+              "resource_type": "docs",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            }
+          ],
+          "progress": null
+        }
+      ],
+      "resources": [],
+      "progress": null
+    },
+    {
+      "id": 16,
+      "name": "Data Engineering",
+      "description": "Skills required to manage and prepare data for AI applications.",
+      "level": "category",
+      "parent_id": 1,
+      "difficulty": 3,
+      "relevance_score": 0.8,
+      "trend": "stable",
+      "position_x": 0.0,
+      "position_y": 0.0,
+      "created_at": "2026-05-31 08:14:14",
+      "updated_at": "2026-05-31 08:14:14",
+      "children": [
+        {
+          "id": 17,
+          "name": "Data Wrangling",
+          "description": "Techniques for cleaning and transforming raw data into a usable format.",
+          "level": "skill",
+          "parent_id": 16,
+          "difficulty": 3,
+          "relevance_score": 0.7,
+          "trend": "stable",
+          "position_x": 0.0,
+          "position_y": 0.0,
+          "created_at": "2026-05-31 08:14:14",
+          "updated_at": "2026-05-31 08:14:14",
+          "children": [
+            {
+              "id": 18,
+              "name": "Data Cleaning Techniques",
+              "description": "Methods for identifying and correcting inaccuracies in data.",
+              "level": "subskill",
+              "parent_id": 17,
+              "difficulty": 3,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 20,
+                  "skill_node_id": 18,
+                  "title": "Data Cleaning - Kaggle",
+                  "url": "https://www.kaggle.com/learn/data-cleaning",
+                  "resource_type": "course",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            },
+            {
+              "id": 19,
+              "name": "Feature Engineering",
+              "description": "Creating new features from existing data to improve model performance.",
+              "level": "subskill",
+              "parent_id": 17,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 21,
+                  "skill_node_id": 19,
+                  "title": "Feature Engineering for Machine Learning - Coursera",
+                  "url": "https://www.coursera.org/learn/feature-engineering-for-machine-learning",
+                  "resource_type": "video",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            }
+          ],
+          "resources": [
+            {
+              "id": 18,
+              "skill_node_id": 17,
+              "title": "Data Wrangling with Pandas - DataCamp",
+              "url": "https://www.datacamp.com/courses/data-wrangling-with-pandas",
+              "resource_type": "video",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            },
+            {
+              "id": 19,
+              "skill_node_id": 17,
+              "title": "Data Wrangling in Python - Towards Data Science",
+              "url": "https://towardsdatascience.com/data-wrangling-in-python-4b4f5e4e664f",
+              "resource_type": "article",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            }
+          ],
+          "progress": null
+        },
+        {
+          "id": 20,
+          "name": "Database Management",
+          "description": "Understanding how to use databases for storing and retrieving data efficiently.",
+          "level": "skill",
+          "parent_id": 16,
+          "difficulty": 3,
+          "relevance_score": 0.7,
+          "trend": "stable",
+          "position_x": 0.0,
+          "position_y": 0.0,
+          "created_at": "2026-05-31 08:14:14",
+          "updated_at": "2026-05-31 08:14:14",
+          "children": [
+            {
+              "id": 21,
+              "name": "SQL Proficiency",
+              "description": "Writing SQL queries to manipulate and retrieve data from databases.",
+              "level": "subskill",
+              "parent_id": 20,
+              "difficulty": 3,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 24,
+                  "skill_node_id": 21,
+                  "title": "W3Schools SQL Tutorial",
+                  "url": "https://www.w3schools.com/sql/",
+                  "resource_type": "tutorial",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            },
+            {
+              "id": 22,
+              "name": "NoSQL Databases",
+              "description": "Understanding and using non-relational databases like MongoDB.",
+              "level": "subskill",
+              "parent_id": 20,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 25,
+                  "skill_node_id": 22,
+                  "title": "MongoDB University",
+                  "url": "https://university.mongodb.com/",
+                  "resource_type": "course",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            }
+          ],
+          "resources": [
+            {
+              "id": 22,
+              "skill_node_id": 20,
+              "title": "SQL for Data Science - Coursera",
+              "url": "https://www.coursera.org/learn/sql-for-data-science",
+              "resource_type": "video",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            },
+            {
+              "id": 23,
+              "skill_node_id": 20,
+              "title": "Database Management Systems - GeeksforGeeks",
+              "url": "https://www.geeksforgeeks.org/database-management-system-dbs/",
+              "resource_type": "article",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            }
+          ],
+          "progress": null
+        }
+      ],
+      "resources": [],
+      "progress": null
+    },
+    {
+      "id": 23,
+      "name": "Model Deployment",
+      "description": "Skills for deploying machine learning models to production environments.",
+      "level": "category",
+      "parent_id": 1,
+      "difficulty": 4,
+      "relevance_score": 0.8,
+      "trend": "stable",
+      "position_x": 0.0,
+      "position_y": 0.0,
+      "created_at": "2026-05-31 08:14:14",
+      "updated_at": "2026-05-31 08:14:14",
+      "children": [
+        {
+          "id": 24,
+          "name": "Model Serving",
+          "description": "Techniques for making machine learning models available as APIs.",
+          "level": "skill",
+          "parent_id": 23,
+          "difficulty": 4,
+          "relevance_score": 0.7,
+          "trend": "stable",
+          "position_x": 0.0,
+          "position_y": 0.0,
+          "created_at": "2026-05-31 08:14:14",
+          "updated_at": "2026-05-31 08:14:14",
+          "children": [
+            {
+              "id": 25,
+              "name": "Docker for Deployment",
+              "description": "Using Docker to create containerized applications for model deployment.",
+              "level": "subskill",
+              "parent_id": 24,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 28,
+                  "skill_node_id": 25,
+                  "title": "Docker for Data Science - Towards Data Science",
+                  "url": "https://towardsdatascience.com/docker-for-data-science-5f3c9f587b4e",
+                  "resource_type": "article",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            },
+            {
+              "id": 26,
+              "name": "Continuous Integration/Continuous Deployment (CI/CD)",
+              "description": "Implementing CI/CD pipelines for automated deployment of machine learning models.",
+              "level": "subskill",
+              "parent_id": 24,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 29,
+                  "skill_node_id": 26,
+                  "title": "CI/CD for Machine Learning - Google Cloud",
+                  "url": "https://cloud.google.com/architecture/mlops-ml-pipelines",
+                  "resource_type": "article",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            }
+          ],
+          "resources": [
+            {
+              "id": 26,
+              "skill_node_id": 24,
+              "title": "Building Machine Learning APIs - Google Cloud",
+              "url": "https://cloud.google.com/architecture/ml-api",
+              "resource_type": "tutorial",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            },
+            {
+              "id": 27,
+              "skill_node_id": 24,
+              "title": "Flask for Machine Learning - Towards Data Science",
+              "url": "https://towardsdatascience.com/deploy-a-machine-learning-model-with-flask-90c5f7d6bd8",
+              "resource_type": "article",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            }
+          ],
+          "progress": null
+        },
+        {
+          "id": 27,
+          "name": "Model Monitoring",
+          "description": "Techniques for monitoring the performance and behavior of machine learning models in production.",
+          "level": "skill",
+          "parent_id": 23,
+          "difficulty": 4,
+          "relevance_score": 0.7,
+          "trend": "stable",
+          "position_x": 0.0,
+          "position_y": 0.0,
+          "created_at": "2026-05-31 08:14:14",
+          "updated_at": "2026-05-31 08:14:14",
+          "children": [
+            {
+              "id": 28,
+              "name": "Performance Metrics",
+              "description": "Understanding metrics to evaluate model performance.",
+              "level": "subskill",
+              "parent_id": 27,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 32,
+                  "skill_node_id": 28,
+                  "title": "Model Evaluation Metrics - Towards Data Science",
+                  "url": "https://towardsdatascience.com/model-evaluation-metrics-2e9e84c76d6a",
+                  "resource_type": "article",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            },
+            {
+              "id": 29,
+              "name": "Drift Detection",
+              "description": "Techniques for detecting changes in model performance over time.",
+              "level": "subskill",
+              "parent_id": 27,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 33,
+                  "skill_node_id": 29,
+                  "title": "Data Drift Detection - Google Cloud",
+                  "url": "https://cloud.google.com/vertex-ai/docs/mlops/data-drift",
+                  "resource_type": "docs",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            }
+          ],
+          "resources": [
+            {
+              "id": 30,
+              "skill_node_id": 27,
+              "title": "Model Monitoring - AWS",
+              "url": "https://aws.amazon.com/machine-learning/model-monitoring/",
+              "resource_type": "docs",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            },
+            {
+              "id": 31,
+              "skill_node_id": 27,
+              "title": "Monitoring Machine Learning Models - Towards Data Science",
+              "url": "https://towardsdatascience.com/monitoring-machine-learning-models-12e3c1c6e3c",
+              "resource_type": "article",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            }
+          ],
+          "progress": null
+        }
+      ],
+      "resources": [],
+      "progress": null
+    },
+    {
+      "id": 30,
+      "name": "Ethics in AI",
+      "description": "Understanding the ethical implications and responsibilities associated with AI technology.",
+      "level": "category",
+      "parent_id": 1,
+      "difficulty": 3,
+      "relevance_score": 0.8,
+      "trend": "stable",
+      "position_x": 0.0,
+      "position_y": 0.0,
+      "created_at": "2026-05-31 08:14:14",
+      "updated_at": "2026-05-31 08:14:14",
+      "children": [
+        {
+          "id": 31,
+          "name": "Bias in AI",
+          "description": "Recognizing and mitigating biases in AI models and datasets.",
+          "level": "skill",
+          "parent_id": 30,
+          "difficulty": 4,
+          "relevance_score": 0.7,
+          "trend": "stable",
+          "position_x": 0.0,
+          "position_y": 0.0,
+          "created_at": "2026-05-31 08:14:14",
+          "updated_at": "2026-05-31 08:14:14",
+          "children": [
+            {
+              "id": 32,
+              "name": "Fairness Metrics",
+              "description": "Understanding metrics to evaluate and ensure fairness in models.",
+              "level": "subskill",
+              "parent_id": 31,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 36,
+                  "skill_node_id": 32,
+                  "title": "Fairness in Machine Learning - Google AI",
+                  "url": "https://ai.google/research/pubs/archive/2019/fairness.pdf",
+                  "resource_type": "paper",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            },
+            {
+              "id": 33,
+              "name": "Transparency and Explainability",
+              "description": "Techniques for making AI decisions understandable to users.",
+              "level": "subskill",
+              "parent_id": 31,
+              "difficulty": 4,
+              "relevance_score": 0.6,
+              "trend": "stable",
+              "position_x": 0.0,
+              "position_y": 0.0,
+              "created_at": "2026-05-31 08:14:14",
+              "updated_at": "2026-05-31 08:14:14",
+              "children": [],
+              "resources": [
+                {
+                  "id": 37,
+                  "skill_node_id": 33,
+                  "title": "Explainable AI - Google Cloud",
+                  "url": "https://cloud.google.com/explainable-ai",
+                  "resource_type": "docs",
+                  "source": "AI Generated",
+                  "quality_score": 0.5,
+                  "created_at": "2026-05-31 08:14:14"
+                }
+              ],
+              "progress": null
+            }
+          ],
+          "resources": [
+            {
+              "id": 34,
+              "skill_node_id": 31,
+              "title": "Bias in AI - IBM",
+              "url": "https://www.ibm.com/blogs/research/2021/07/bias-in-ai/",
+              "resource_type": "article",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            },
+            {
+              "id": 35,
+              "skill_node_id": 31,
+              "title": "Fairness in Machine Learning - Fairness in ML",
+              "url": "https://fairmlbook.org/",
+              "resource_type": "book",
+              "source": "AI Generated",
+              "quality_score": 0.5,
+              "created_at": "2026-05-31 08:14:14"
+            }
+          ],
+          "progress": null
+        }
+      ],
+      "resources": [],
+      "progress": null
+    }
+  ],
+  "resources": [],
+  "progress": null
+}
