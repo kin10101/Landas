@@ -10,22 +10,30 @@ services:
       - key: OPENAI_API_KEY
         sync: false  # Set manually in Render dashboard
       - key: OPENAI_MODEL
-        value: gpt-4o-mini
-      - key: RESEARCH_LOG_LEVEL
-        value: INFO
+        value: gpt-4.1-mini
+      - key: LANGCHAIN_TRACING_V2
+        value: "true"
+      - key: LANGCHAIN_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: LANGCHAIN_PROJECT
+        value: landas
+      - key: CORS_ORIGINS
+        value: "*"
     healthCheckPath: /api/health
 
-  # Frontend
+  # Frontend (static site)
   - type: web
     name: landas-frontend
-    plan: free
-    runtime: docker
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: ./frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    rootDir: frontend
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
-      - key: BACKEND_URL
-        fromService:
-          name: landas-backend
-          type: web
-          property: hostport
-          prefix: https://
+      # Set this manually in Render dashboard after backend deploys
+      # Value should be: https://landas-backend.onrender.com/api
+      - key: VITE_API_URL
+        sync: false

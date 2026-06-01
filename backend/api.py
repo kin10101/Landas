@@ -80,10 +80,19 @@ app = FastAPI(
 )
 
 # CORS for frontend
+cors_origins = os.getenv("CORS_ORIGINS", "").split(",") if os.getenv("CORS_ORIGINS") else [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://localhost:5176",
+    "http://localhost:3000",
+]
+# Allow all origins in production if CORS_ORIGINS is set to "*"
+allow_all = "*" in cors_origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176", "http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=["*"] if allow_all else cors_origins,
+    allow_credentials=not allow_all,  # credentials not allowed with wildcard
     allow_methods=["*"],
     allow_headers=["*"],
 )
