@@ -1,0 +1,28 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install uv for fast dependency management
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Copy dependency files
+COPY backend/pyproject.toml backend/uv.lock ./backend/
+COPY requirements.txt ./
+
+# Copy research_agent module (required by backend)
+COPY research_agent/ ./research_agent/
+
+# Copy backend code
+COPY backend/ ./backend/
+
+# Install dependencies
+WORKDIR /app/backend
+RUN uv sync --frozen --no-dev
+
+# Create data directory for SQLite
+RUN mkdir -p /app/data
+
+EXPOSE 8000
+
+# Run with uvicorn
+CMD ["uv", "run", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]

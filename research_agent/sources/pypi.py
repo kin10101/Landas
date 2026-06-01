@@ -91,13 +91,19 @@ class PyPISource(BaseSource):
                     self.data.append(source_data)
 
                 except Exception as e:
+                    await self.emit_log(
+                        f"Warning: Could not fetch PyPI package {package_name}: {str(e)}",
+                        level="warning"
+                    )
                     continue
 
             await self.emit_progress(EventType.SOURCE_COMPLETED, items_collected=len(self.data))
             print(f"[+] PyPI: Fetched {len(self.data)} packages")
+            await self.emit_log(f"[+] PyPI: Fetched {len(self.data)} packages")
             return self.data
 
         except Exception as e:
             await self.emit_progress(EventType.SOURCE_FAILED, error=str(e))
             print(f"[!] PyPI Error: {str(e)}")
+            await self.emit_log(f"[!] PyPI Error: {str(e)}", level="error")
             return []

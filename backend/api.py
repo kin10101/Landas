@@ -176,6 +176,197 @@ class TopicResearchRequest(BaseModel):
     tree_id: int
 
 
+async def run_topic_research(request: TopicResearchRequest, current_user: dict, progress_queue: Optional[asyncio.Queue] = None):
+    async def emit_event(event_type: EventType, **data):
+        if progress_queue is None:
+            return
+        event = ProgressEvent(
+            type=event_type,
+            timestamp=datetime.utcnow(),
+            data=data
+        )
+        await progress_queue.put(event)
+
+    async def emit_log(message: str, level: str = "info"):
+        await emit_event(EventType.LOG, message=message, level=level)
+
+    await emit_event(EventType.TOPIC_STARTED, topic=request.topic, tree_id=request.tree_id)
+    await emit_log(f"[*] Topic research started: {request.topic}")
+
+    tree = db.get_full_tree(request.tree_id, user_id=current_user["id"])
+    if not tree:
+        await emit_log("[!] Tree not found for topic research", level="error")
+        raise HTTPException(status_code=404, detail="Tree not found")
+
+    def get_tree_structure(node, depth=0):
+        result = {"name": node["name"], "id": node["id"], "level": node.get("level", ""), "children": []}
+        for child in node.get("children", []):
+            result["children"].append(get_tree_structure(child, depth + 1))
+        return result
+
+    tree_structure = get_tree_structure(tree)
+
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+    await emit_log("[*] Generating topic additions with OpenAI...")
+
+    prompt = f"""
+You are helping build a skill tree for career development.
+
+Current tree structure:
+{json.dumps(tree_structure, indent=2)}
+
+The user wants to research: "{request.topic}"
+
+Analyze this request:
+1. Is the user asking about a single topic, or asking for subtopics/breakdown (e.g., "types of X", "different approaches to Y")?
+2. Find the best parent node in the existing tree
+3. Generate appropriate nodes with learning resources
+
+If asking for subtopics, create multiple nodes (3-6 subnodes).
+If a single topic, create one node.
+
+For EACH node, include 2-3 real learning resources with valid URLs.
+
+Return ONLY valid JSON:
+{{
+    "relevant": true/false,
+    "is_breakdown": true/false,
+    "parent_id": <id of parent node>,
+    "parent_name": "<parent name>",
+    "nodes": [
+        {{
+            "name": "<skill name>",
+            "description": "<brief description>",
+            "level": "skill" or "subskill",
+            "difficulty": 1-5,
+            "resources": [
+                {{
+                    "title": "<resource title>",
+                    "url": "<real URL>",
+                    "resource_type": "docs|tutorial|video|article|course",
+                    "source": "<platform name>"
+                }}
+            ]
+        }}
+    ],
+    "reason": "<why this placement>"
+}}
+
+IMPORTANT: Only include real, existing resources with valid URLs. Common good sources:
+- Official documentation sites
+- YouTube tutorials
+- Medium/Dev.to articles
+- Coursera/Udemy courses
+- GitHub repos with good READMEs
+"""
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            max_tokens=2000,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.4
+        )
+
+        text = response.choices[0].message.content
+        if "```json" in text:
+            json_str = text.split("```json")[1].split("```")[0].strip()
+        elif "```" in text:
+            json_str = text.split("```")[1].split("```")[0].strip()
+        else:
+            json_str = text.strip()
+
+        result = json.loads(json_str)
+
+        if not result.get("relevant"):
+            await emit_log("[!] Topic not relevant to this skill tree", level="warning")
+            return {
+                "success": False,
+                "message": result.get("reason", "Topic not relevant to this skill tree")
+            }
+
+        if not result.get("nodes"):
+            await emit_log("[!] No nodes to add for this topic", level="warning")
+            return {
+                "success": False,
+                "message": "No nodes to add"
+            }
+
+        from database import ResourceCreate
+
+        added_nodes = []
+        level_map = {"category": "category", "skill": "skill", "subskill": "subskill"}
+
+        await emit_log(f"[*] Adding {len(result['nodes'])} topic nodes to the tree...")
+
+        for node_data in result["nodes"]:
+            new_node = SkillNodeCreate(
+                name=node_data["name"],
+                description=node_data.get("description", ""),
+                level=NodeLevel(level_map.get(node_data.get("level", "skill"), "skill")),
+                parent_id=result["parent_id"],
+                difficulty=node_data.get("difficulty", 3),
+                relevance_score=0.8,
+                trend=TrendDirection.EMERGING,
+                user_id=current_user["id"]
+            )
+
+            node_id = db.create_skill_node(new_node)
+
+            resources_added = 0
+            resources_list = node_data.get("resources", [])
+            if resources_list:
+                from url_validator import filter_valid_resources
+                valid_resources, invalid_resources = await filter_valid_resources(resources_list, timeout=5.0)
+                if invalid_resources:
+                    await emit_log(
+                        f"[!] Filtered {len(invalid_resources)} invalid resource URLs",
+                        level="warning"
+                    )
+            else:
+                valid_resources = []
+
+            for res in valid_resources:
+                try:
+                    resource = ResourceCreate(
+                        skill_node_id=node_id,
+                        title=res["title"],
+                        url=res["url"],
+                        resource_type=res.get("resource_type", "article"),
+                        source=res.get("source")
+                    )
+                    db.add_resource(resource)
+                    resources_added += 1
+                except Exception:
+                    continue
+
+            added_nodes.append({
+                "id": node_id,
+                "name": node_data["name"],
+                "resources_added": resources_added
+            })
+
+            await emit_log(f"[+] Added: {node_data['name']} with {resources_added} resources")
+
+        return {
+            "success": True,
+            "is_breakdown": result.get("is_breakdown", False),
+            "nodes_added": len(added_nodes),
+            "nodes": added_nodes,
+            "placement": {
+                "parent_id": result["parent_id"],
+                "parent_name": result.get("parent_name", "")
+            },
+            "reason": result.get("reason", "")
+        }
+
+    except Exception as e:
+        await emit_log(f"[!] Topic research failed: {str(e)}", level="error")
+        raise HTTPException(status_code=500, detail=f"AI analysis failed: {str(e)}")
+
+
 # --- Tree Endpoints ---
 
 @app.get("/api/trees")
@@ -398,7 +589,14 @@ async def execute_research_with_streaming(session_id: str, progress_queue: async
             }
 
         # Enable debug mode to save AI inputs/outputs to research_agent/debug/
-        runner = ResearchRunner(str(config_path), progress_queue=progress_queue, db=db, debug=True, user_config=user_config)
+        runner = ResearchRunner(
+            str(config_path),
+            progress_queue=progress_queue,
+            db=db,
+            debug=True,
+            user_config=user_config,
+            user_id=user_id
+        )
         json_output, table_output, finding = await runner.run(output_format="json")
 
         research_status["last_run"] = datetime.now().isoformat()
@@ -449,7 +647,7 @@ async def stream_research_progress(session_id: str):
                 }
                 yield f"data: {json.dumps(event_data)}\n\n"
 
-                if event.type in ["research_completed", "research_failed"]:
+                if event.type in ["research_completed", "research_failed", "topic_completed", "topic_failed"]:
                     break
 
             except asyncio.TimeoutError:
@@ -632,163 +830,48 @@ def delete_resource(resource_id: int):
 @app.post("/api/research/topic")
 async def research_topic(request: TopicResearchRequest, current_user: dict = Depends(get_current_user)):
     """Research a specific topic and add it to the skill tree with subnodes and resources"""
-    tree = db.get_full_tree(request.tree_id, user_id=current_user["id"])
-    if not tree:
-        raise HTTPException(status_code=404, detail="Tree not found")
+    return await run_topic_research(request, current_user)
 
-    def get_tree_structure(node, depth=0):
-        result = {"name": node["name"], "id": node["id"], "level": node.get("level", ""), "children": []}
-        for child in node.get("children", []):
-            result["children"].append(get_tree_structure(child, depth + 1))
-        return result
 
-    tree_structure = get_tree_structure(tree)
-
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-
-    prompt = f"""
-You are helping build a skill tree for career development.
-
-Current tree structure:
-{json.dumps(tree_structure, indent=2)}
-
-The user wants to research: "{request.topic}"
-
-Analyze this request:
-1. Is the user asking about a single topic, or asking for subtopics/breakdown (e.g., "types of X", "different approaches to Y")?
-2. Find the best parent node in the existing tree
-3. Generate appropriate nodes with learning resources
-
-If asking for subtopics, create multiple nodes (3-6 subnodes).
-If a single topic, create one node.
-
-For EACH node, include 2-3 real learning resources with valid URLs.
-
-Return ONLY valid JSON:
-{{
-    "relevant": true/false,
-    "is_breakdown": true/false,
-    "parent_id": <id of parent node>,
-    "parent_name": "<parent name>",
-    "nodes": [
-        {{
-            "name": "<skill name>",
-            "description": "<brief description>",
-            "level": "skill" or "subskill",
-            "difficulty": 1-5,
-            "resources": [
-                {{
-                    "title": "<resource title>",
-                    "url": "<real URL>",
-                    "resource_type": "docs|tutorial|video|article|course",
-                    "source": "<platform name>"
-                }}
-            ]
-        }}
-    ],
-    "reason": "<why this placement>"
-}}
-
-IMPORTANT: Only include real, existing resources with valid URLs. Common good sources:
-- Official documentation sites
-- YouTube tutorials
-- Medium/Dev.to articles
-- Coursera/Udemy courses
-- GitHub repos with good READMEs
-"""
-
+async def execute_topic_research_with_streaming(session_id: str, progress_queue: asyncio.Queue, request: TopicResearchRequest, current_user: dict):
     try:
-        response = client.chat.completions.create(
-            model=model,
-            max_tokens=2000,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.4
-        )
-
-        text = response.choices[0].message.content
-        if "```json" in text:
-            json_str = text.split("```json")[1].split("```")[0].strip()
-        elif "```" in text:
-            json_str = text.split("```")[1].split("```")[0].strip()
-        else:
-            json_str = text.strip()
-
-        result = json.loads(json_str)
-
-        if not result.get("relevant"):
-            return {
-                "success": False,
-                "message": result.get("reason", "Topic not relevant to this skill tree")
-            }
-
-        if not result.get("nodes"):
-            return {
-                "success": False,
-                "message": "No nodes to add"
-            }
-
-        from database import ResourceCreate
-
-        added_nodes = []
-        level_map = {"category": "category", "skill": "skill", "subskill": "subskill"}
-
-        for node_data in result["nodes"]:
-            new_node = SkillNodeCreate(
-                name=node_data["name"],
-                description=node_data.get("description", ""),
-                level=NodeLevel(level_map.get(node_data.get("level", "skill"), "skill")),
-                parent_id=result["parent_id"],
-                difficulty=node_data.get("difficulty", 3),
-                relevance_score=0.8,
-                trend=TrendDirection.EMERGING,
-                user_id=current_user["id"]
+        result = await run_topic_research(request, current_user, progress_queue)
+        if result.get("success"):
+            event = ProgressEvent(
+                type=EventType.TOPIC_COMPLETED,
+                timestamp=datetime.utcnow(),
+                data=result
             )
-
-            node_id = db.create_skill_node(new_node)
-
-            resources_added = 0
-            resources_list = node_data.get("resources", [])
-            if resources_list:
-                from url_validator import filter_valid_resources
-                valid_resources, _ = await filter_valid_resources(resources_list, timeout=5.0)
-            else:
-                valid_resources = []
-
-            for res in valid_resources:
-                try:
-                    resource = ResourceCreate(
-                        skill_node_id=node_id,
-                        title=res["title"],
-                        url=res["url"],
-                        resource_type=res.get("resource_type", "article"),
-                        source=res.get("source")
-                    )
-                    db.add_resource(resource)
-                    resources_added += 1
-                except Exception:
-                    pass
-
-            added_nodes.append({
-                "id": node_id,
-                "name": node_data["name"],
-                "resources_added": resources_added
-            })
-
-        return {
-            "success": True,
-            "is_breakdown": result.get("is_breakdown", False),
-            "nodes_added": len(added_nodes),
-            "nodes": added_nodes,
-            "placement": {
-                "parent_id": result["parent_id"],
-                "parent_name": result.get("parent_name", "")
-            },
-            "reason": result.get("reason", "")
-        }
-
+        else:
+            event = ProgressEvent(
+                type=EventType.TOPIC_FAILED,
+                timestamp=datetime.utcnow(),
+                data={"error": result.get("message", "Topic research failed")}
+            )
+        await progress_queue.put(event)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI analysis failed: {str(e)}")
+        error_event = ProgressEvent(
+            type=EventType.TOPIC_FAILED,
+            timestamp=datetime.utcnow(),
+            data={"error": str(e)}
+        )
+        await progress_queue.put(error_event)
+    finally:
+        await asyncio.sleep(2)
+        if session_id in active_research_sessions:
+            del active_research_sessions[session_id]
+
+
+@app.post("/api/research/topic/start")
+async def start_topic_research_stream(request: TopicResearchRequest, current_user: dict = Depends(get_current_user)):
+    """Start topic research with SSE streaming support"""
+    session_id = str(uuid.uuid4())
+    progress_queue = asyncio.Queue()
+    active_research_sessions[session_id] = progress_queue
+
+    asyncio.create_task(execute_topic_research_with_streaming(session_id, progress_queue, request, current_user))
+
+    return {"session_id": session_id, "message": "Topic research started"}
 
 
 # --- User Preferences Endpoints ---

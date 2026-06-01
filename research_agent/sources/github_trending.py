@@ -78,13 +78,19 @@ class GitHubTrendingSource(BaseSource):
                         self.data.append(source_data)
                     except Exception as e:
                         print(f"  Warning: Could not parse repo: {str(e)}")
+                        await self.emit_log(
+                            f"Warning: Could not parse repo: {str(e)}",
+                            level="warning"
+                        )
                         continue
 
             await self.emit_progress(EventType.SOURCE_COMPLETED, items_collected=len(self.data))
             print(f"[+] GitHub: Fetched {len(self.data)} trending repos")
+            await self.emit_log(f"[+] GitHub: Fetched {len(self.data)} trending repos")
             return self.data
 
         except Exception as e:
             await self.emit_progress(EventType.SOURCE_FAILED, error=str(e))
             print(f"[!] GitHub Error: {str(e)}")
+            await self.emit_log(f"[!] GitHub Error: {str(e)}", level="error")
             return []

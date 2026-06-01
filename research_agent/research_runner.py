@@ -36,7 +36,7 @@ except ImportError:
 class ResearchRunner:
     """Orchestrates the research process with database integration"""
 
-    def __init__(self, config_path: str = "config.yaml", progress_queue: Optional[asyncio.Queue] = None, db: Optional[Database] = None, debug: bool = False, user_config: dict = None):
+    def __init__(self, config_path: str = "config.yaml", progress_queue: Optional[asyncio.Queue] = None, db: Optional[Database] = None, debug: bool = False, user_config: dict = None, user_id: Optional[int] = None):
         self.config = self._load_config(config_path)
         self.user_config = user_config
         self._merge_user_config(user_config)
@@ -45,6 +45,7 @@ class ResearchRunner:
         self.sources = self._initialize_sources()
         self.debug = debug
         self.analyzer = AIAnalyzer(debug=debug)
+        self.user_id = user_id
 
         if db is not None:
             self.db = db
@@ -143,6 +144,7 @@ class ResearchRunner:
         print("\n" + "=" * 80)
         print("[*] STARTING RESEARCH AGENT")
         print("=" * 80)
+        await self._emit_progress(EventType.LOG, message="[*] Starting research agent")
 
         start_time = time.time()
         research_run_id = str(uuid.uuid4())
@@ -150,6 +152,10 @@ class ResearchRunner:
         print(f"\nResearch Run ID: {research_run_id}")
         print(f"Targets: {', '.join(self.config['research_agent']['target_roles'])}")
         print(f"Active Sources: {len(self.sources)}")
+        await self._emit_progress(
+            EventType.LOG,
+            message=f"Research Run ID: {research_run_id} | Targets: {', '.join(self.config['research_agent']['target_roles'])} | Active Sources: {len(self.sources)}"
+        )
 
         await self._emit_progress(
             EventType.RESEARCH_STARTED,
@@ -163,8 +169,13 @@ class ResearchRunner:
             previous_discoveries = self.db.get_all_discoveries()
             if previous_discoveries:
                 print(f"[*] Found {len(previous_discoveries)} previously discovered technologies")
+                await self._emit_progress(
+                    EventType.LOG,
+                    message=f"[*] Found {len(previous_discoveries)} previously discovered technologies"
+                )
 
             print("\n[*] COLLECTING DATA FROM SOURCES...")
+            await self._emit_progress(EventType.LOG, message="[*] Collecting data from sources...")
             all_data = await self._collect_from_sources()
 
             await self._emit_progress(
@@ -179,8 +190,10 @@ class ResearchRunner:
                 return None, None, None
 
             print(f"\n[+] Total items collected: {len(all_data)}")
+            await self._emit_progress(EventType.LOG, message=f"[+] Total items collected: {len(all_data)}")
 
             print("\n[*] ANALYZING WITH OPENAI...")
+            await self._emit_progress(EventType.LOG, message="[*] Analyzing with OpenAI...")
             await self._emit_progress(EventType.ANALYSIS_STARTED, items_to_analyze=len(all_data))
 
             research_finding = self.analyzer.analyze_sources(
@@ -213,11 +226,13 @@ class ResearchRunner:
             self._save_to_database(research_run_id, research_finding, all_data)
 
             print(f"\n[*] ADDING TO SKILL TREE...")
+            await self._emit_progress(EventType.LOG, message="[*] Adding findings to skill tree...")
             print(f"[DEBUG] research_finding has {len(research_finding.emerging_technologies)} emerging, {len(research_finding.established_technologies)} established techs")
             added_nodes = await self._add_to_skill_tree(research_finding)
             print(f"[DEBUG] Added {len(added_nodes)} nodes to skill tree")
 
             print("\n[*] FORMATTING OUTPUT...")
+            await self._emit_progress(EventType.LOG, message="[*] Formatting output...")
 
             json_output = None
             table_output = None
@@ -232,6 +247,7 @@ class ResearchRunner:
                 print(table_output)
 
             print(f"\n[+] Research completed in {exec_time:.2f}s")
+            await self._emit_progress(EventType.LOG, message=f"[+] Research completed in {exec_time:.2f}s")
 
             await self._emit_progress(
                 EventType.RESEARCH_COMPLETED,
@@ -323,13 +339,27 @@ class ResearchRunner:
 
         added_nodes = []
 
-        root_nodes = self.db.get_root_nodes()
+        root_nodes = self.db.get_root_nodes(user_id=self.user_id) if self.user_id is not None else self.db.get_root_nodes()
         if not root_nodes:
             print("[!] No skill tree found to add technologies to")
             return added_nodes
 
-        root_id = root_nodes[0]["id"]
-        tree = self.db.get_full_tree(root_id)
+        desired_role = None
+        if self.user_config and self.user_config.get("target_role"):
+            desired_role = self.user_config["target_role"]
+        elif finding.target_roles:
+            desired_role = finding.target_roles[0]
+
+        root_node = None
+        if desired_role:
+            desired_lower = desired_role.lower()
+            root_node = next((node for node in root_nodes if node["name"].lower() == desired_lower), None)
+
+        if root_node is None:
+            root_node = root_nodes[0]
+
+        root_id = root_node["id"]
+        tree = self.db.get_full_tree(root_id, user_id=self.user_id) if self.user_id is not None else self.db.get_full_tree(root_id)
         if not tree:
             return added_nodes
 
@@ -351,6 +381,7 @@ class ResearchRunner:
         existing_names = get_existing_names(tree)
 
         print(f"[DEBUG] Existing skills in tree: {len(existing_names)}")
+        await self._emit_progress(EventType.LOG, message=f"[DEBUG] Existing skills in tree: {len(existing_names)}")
 
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
@@ -361,6 +392,7 @@ class ResearchRunner:
         relevance_threshold = self.config["research_agent"].get("relevance_threshold", 0.5)
 
         print(f"[DEBUG] Emerging technologies found: {len(finding.emerging_technologies)}")
+        await self._emit_progress(EventType.LOG, message=f"[DEBUG] Emerging technologies found: {len(finding.emerging_technologies)}")
         for tech in finding.emerging_technologies:
             print(f"  - {tech.name}: relevance={tech.relevance_score}, in_tree={tech.name.lower() in existing_names}")
 
@@ -377,6 +409,7 @@ class ResearchRunner:
                 })
 
         print(f"[DEBUG] Established technologies found: {len(finding.established_technologies)}")
+        await self._emit_progress(EventType.LOG, message=f"[DEBUG] Established technologies found: {len(finding.established_technologies)}")
         for tech in finding.established_technologies:
             print(f"  - {tech.name}: adoption={tech.current_adoption}, in_tree={tech.name.lower() in existing_names}")
 
@@ -394,6 +427,7 @@ class ResearchRunner:
                 })
 
         print(f"[DEBUG] Technologies passing filters: {len(all_techs)}")
+        await self._emit_progress(EventType.LOG, message=f"[DEBUG] Technologies passing filters: {len(all_techs)}")
         for tech in all_techs:
             print(f"  - {tech['name']} ({tech['trend']})")
 
@@ -402,6 +436,7 @@ class ResearchRunner:
             # Still check for missing skills
 
         print(f"\n[*] Analyzing skill tree for {', '.join(finding.target_roles)}...")
+        await self._emit_progress(EventType.LOG, message=f"[*] Analyzing skill tree for {', '.join(finding.target_roles)}...")
 
         # Ask AI to suggest additions based on research findings
         tech_summary = json.dumps(all_techs[:20], indent=2) if all_techs else "No new specific technologies found"
@@ -499,9 +534,11 @@ Return empty array [] if the tree is already comprehensive.
 
             if not suggestions:
                 print("[*] AI determined skill tree is comprehensive")
+                await self._emit_progress(EventType.LOG, message="[*] AI determined skill tree is comprehensive")
                 return added_nodes
 
             print(f"[*] Adding {len(suggestions)} skills to the tree...")
+            await self._emit_progress(EventType.LOG, message=f"[*] Adding {len(suggestions)} skills to the tree...")
 
             from database import SkillNodeCreate, NodeLevel, TrendDirection
 
@@ -536,7 +573,8 @@ Return empty array [] if the tree is already comprehensive.
                         parent_id=suggestion["parent_id"],
                         difficulty=suggestion.get("difficulty", 3),
                         relevance_score=0.8,
-                        trend=trend_map.get(suggestion.get("trend", "stable"), TrendDirection.STABLE)
+                        trend=trend_map.get(suggestion.get("trend", "stable"), TrendDirection.STABLE),
+                        user_id=self.user_id or 1
                     )
 
                     node_id = self.db.create_skill_node(new_node)
@@ -565,16 +603,27 @@ Return empty array [] if the tree is already comprehensive.
                     )
 
                     print(f"  [+] Added: {suggestion['name']} ({suggestion.get('level', 'skill')}) with {resources_added} resources")
+                    await self._emit_progress(
+                        EventType.LOG,
+                        message=f"[+] Added: {suggestion['name']} ({suggestion.get('level', 'skill')}) with {resources_added} resources"
+                    )
 
                 except Exception as e:
                     print(f"  [!] Failed to add {suggestion['name']}: {str(e)}")
+                    await self._emit_progress(
+                        EventType.LOG,
+                        message=f"[!] Failed to add {suggestion['name']}: {str(e)}",
+                        level="error"
+                    )
                     continue
 
         except Exception as e:
             print(f"[!] AI analysis error: {str(e)}")
+            await self._emit_progress(EventType.LOG, message=f"[!] AI analysis error: {str(e)}", level="error")
 
         if added_nodes:
             print(f"\n[+] Successfully added {len(added_nodes)} new skills to the tree")
+            await self._emit_progress(EventType.LOG, message=f"[+] Successfully added {len(added_nodes)} new skills to the tree")
 
         return added_nodes
 
@@ -632,6 +681,11 @@ Return ONLY valid JSON array:
             valid_resources, invalid = await filter_valid_resources(resources, timeout=5.0)
             if invalid:
                 print(f"    [!] Filtered {len(invalid)} invalid resource URLs")
+                await self._emit_progress(
+                    EventType.LOG,
+                    message=f"[!] Filtered {len(invalid)} invalid resource URLs",
+                    level="warning"
+                )
 
             added_count = 0
 
@@ -651,11 +705,13 @@ Return ONLY valid JSON array:
 
             if added_count > 0:
                 print(f"    [+] Added {added_count} resources")
+                await self._emit_progress(EventType.LOG, message=f"[+] Added {added_count} resources")
 
             return added_count
 
         except Exception as e:
             print(f"    [!] Resource fetch error: {str(e)}")
+            await self._emit_progress(EventType.LOG, message=f"[!] Resource fetch error: {str(e)}", level="error")
             return 0
 
     def get_previous_discoveries(self) -> List[dict]:

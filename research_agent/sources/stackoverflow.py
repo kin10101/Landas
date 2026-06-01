@@ -88,13 +88,19 @@ class StackOverflowSource(BaseSource):
 
                 except Exception as e:
                     print(f"  Warning: Could not fetch SO tag {tag}: {str(e)}")
+                    await self.emit_log(
+                        f"Warning: Could not fetch SO tag {tag}: {str(e)}",
+                        level="warning"
+                    )
                     continue
 
             await self.emit_progress(EventType.SOURCE_COMPLETED, items_collected=len(self.data))
             print(f"[+] StackOverflow: Fetched {len(self.data)} questions")
+            await self.emit_log(f"[+] StackOverflow: Fetched {len(self.data)} questions")
             return self.data
 
         except Exception as e:
             await self.emit_progress(EventType.SOURCE_FAILED, error=str(e))
             print(f"[!] StackOverflow Error: {str(e)}")
+            await self.emit_log(f"[!] StackOverflow Error: {str(e)}", level="error")
             return []

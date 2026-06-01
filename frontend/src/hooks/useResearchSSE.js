@@ -23,6 +23,7 @@ export function useResearchSSE() {
   const [currentPhase, setCurrentPhase] = useState(PHASES.IDLE);
   const [events, setEvents] = useState([]);
   const [sources, setSources] = useState({});
+  const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState({
     itemsCollected: 0,
     technologiesFound: 0,
@@ -32,6 +33,8 @@ export function useResearchSSE() {
   });
   const [discoveries, setDiscoveries] = useState([]);
   const [error, setError] = useState(null);
+  const [mode, setMode] = useState('full');
+  const [topicResult, setTopicResult] = useState(null);
 
   const { authFetch } = useAuth();
   const eventSourceRef = useRef(null);
@@ -41,7 +44,22 @@ export function useResearchSSE() {
     setEvents((prev) => [...prev, event]);
 
     switch (event.type) {
+      case 'log':
+        setLogs((prev) => {
+          const next = [
+            ...prev,
+            {
+              message: event.data.message,
+              level: event.data.level || 'info',
+              source: event.data.source,
+              timestamp: event.timestamp,
+            },
+          ];
+          return next.slice(-200);
+        });
+        break;
       case 'research_started':
+        setMode('full');
         setCurrentPhase(PHASES.COLLECTING);
         setStats((prev) => ({
           ...prev,
@@ -161,6 +179,21 @@ export function useResearchSSE() {
         setError(event.data.error || 'Research failed');
         break;
 
+      case 'topic_started':
+        setMode('topic');
+        setCurrentPhase(PHASES.ANALYZING);
+        break;
+
+      case 'topic_completed':
+        setCurrentPhase(PHASES.COMPLETED);
+        setTopicResult(event.data);
+        break;
+
+      case 'topic_failed':
+        setCurrentPhase(PHASES.FAILED);
+        setError(event.data.error || 'Topic research failed');
+        break;
+
       default:
         break;
     }
@@ -198,6 +231,7 @@ export function useResearchSSE() {
     setEvents([]);
     setSources({});
     setDiscoveries([]);
+    setLogs([]);
     setStats({
       itemsCollected: 0,
       technologiesFound: 0,
@@ -206,6 +240,8 @@ export function useResearchSSE() {
       newTechnologies: 0,
     });
     setError(null);
+    setMode('full');
+    setTopicResult(null);
     setCurrentPhase(PHASES.COLLECTING);
 
     try {
@@ -246,6 +282,72 @@ export function useResearchSSE() {
     }
   }, [handleEvent, fallbackToPolling, authFetch]);
 
+  const startTopicResearch = useCallback(async ({ topic, treeId }) => {
+    if (!topic || !treeId) return;
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+    setEvents([]);
+    setSources({});
+    setDiscoveries([]);
+    setLogs([]);
+    setStats({
+      itemsCollected: 0,
+      technologiesFound: 0,
+      sourcesCompleted: 0,
+      totalSources: 0,
+      newTechnologies: 0,
+    });
+    setError(null);
+    setMode('topic');
+    setTopicResult(null);
+    setCurrentPhase(PHASES.ANALYZING);
+
+    try {
+      const res = await authFetch(`${API_URL}/research/topic/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, tree_id: treeId }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to start topic research');
+      }
+
+      const { session_id } = await res.json();
+
+      const eventSource = new EventSource(`${API_URL}/research/stream/${session_id}`);
+      eventSourceRef.current = eventSource;
+
+      eventSource.onopen = () => {
+        setIsConnected(true);
+      };
+
+      eventSource.onmessage = (e) => {
+        try {
+          const event = JSON.parse(e.data);
+          handleEvent(event);
+        } catch (err) {
+          console.error('Error parsing SSE event:', err);
+        }
+      };
+
+      eventSource.onerror = (e) => {
+        console.error('SSE error:', e);
+        setIsConnected(false);
+        eventSource.close();
+        eventSourceRef.current = null;
+        setError('Topic research connection lost');
+        setCurrentPhase(PHASES.FAILED);
+      };
+    } catch (e) {
+      console.error('Failed to start topic research:', e);
+      setError(e.message);
+      setCurrentPhase(PHASES.FAILED);
+    }
+  }, [authFetch, handleEvent]);
+
   const stopResearch = useCallback(() => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
@@ -264,6 +366,7 @@ export function useResearchSSE() {
     setEvents([]);
     setSources({});
     setDiscoveries([]);
+    setLogs([]);
     setStats({
       itemsCollected: 0,
       technologiesFound: 0,
@@ -272,6 +375,8 @@ export function useResearchSSE() {
       newTechnologies: 0,
     });
     setError(null);
+    setMode('full');
+    setTopicResult(null);
   }, [stopResearch]);
 
   return {
@@ -279,10 +384,14 @@ export function useResearchSSE() {
     currentPhase,
     events,
     sources,
+    logs,
     stats,
     discoveries,
     error,
+    mode,
+    topicResult,
     startResearch,
+    startTopicResearch,
     stopResearch,
     reset,
     PHASES,

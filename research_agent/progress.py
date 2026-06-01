@@ -24,6 +24,10 @@ class EventType(str, Enum):
     ANALYSIS_COMPLETED = "analysis_completed"
     TECH_DISCOVERED = "tech_discovered"
     TREE_UPDATED = "tree_updated"
+    LOG = "log"
+    TOPIC_STARTED = "topic_started"
+    TOPIC_COMPLETED = "topic_completed"
+    TOPIC_FAILED = "topic_failed"
     RESEARCH_COMPLETED = "research_completed"
     RESEARCH_FAILED = "research_failed"
 

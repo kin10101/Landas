@@ -28,6 +28,18 @@ class BaseSource(ABC):
             data["source"] = self.name
             await self.progress_callback.emit(event_type, **data)
 
+    async def emit_log(self, message: str, level: str = "info") -> None:
+        """Emit a log event for live UI updates."""
+        if not self.progress_callback:
+            return
+        from progress import EventType
+        await self.progress_callback.emit(
+            EventType.LOG,
+            message=message,
+            level=level,
+            source=self.name
+        )
+
     async def close(self):
         """Close HTTP client"""
         await self.client.aclose()

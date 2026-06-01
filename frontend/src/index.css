@@ -145,6 +145,22 @@ body {
   overflow-y: auto;
 }
 
+.resource-panel-resizer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.resource-panel:hover .resource-panel-resizer {
+  opacity: 1;
+}
+
 .resource-panel.hidden {
   transform: translateX(100%);
 }
@@ -300,6 +316,10 @@ body {
     border-top-right-radius: 1rem;
   }
 
+  .resource-panel-resizer {
+    display: none;
+  }
+
   .resource-panel.hidden {
     transform: translateY(100%);
   }
@@ -337,6 +357,18 @@ body {
 
   .difficulty-stars {
     font-size: 0.6rem;
+  }
+}
+
+/* Research Progress Panel - Mobile */
+@media (max-width: 640px) {
+  .research-progress-panel {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 1rem 1rem 0 0;
   }
 }
 

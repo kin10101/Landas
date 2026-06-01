@@ -1,0 +1,51 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv
+ENV
+*.egg-info
+.eggs
+
+# Node
+node_modules
+npm-debug.log*
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Build artifacts
+dist
+build
+*.egg
+
+# Environment files (use docker-compose env instead)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs
+
+# Database (use volume instead)
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test/debug files
+debug/
+research_findings_*.txt
+research_findings_*.json
