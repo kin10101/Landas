@@ -3,7 +3,6 @@ services:
   - type: web
     name: landas-backend
     plan: free
-    region: singapore
     runtime: docker
     dockerfilePath: ./Dockerfile.backend
     dockerContext: .
