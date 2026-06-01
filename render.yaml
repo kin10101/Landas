@@ -3,6 +3,7 @@ services:
   - type: web
     name: landas-backend
     plan: free
+    region: singapore
     runtime: docker
     dockerfilePath: ./Dockerfile.backend
     dockerContext: .
@@ -24,6 +25,7 @@ services:
   # Frontend (static site)
   - type: web
     name: landas-frontend
+    region: singapore
     env: static
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
