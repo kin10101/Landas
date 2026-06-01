@@ -54,12 +54,19 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ email, password }),
       });
 
+      const text = await res.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        console.error('Failed to parse response:', text);
+        throw new Error('Server error - please try again');
+      }
+
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.detail || 'Login failed');
       }
 
-      const data = await res.json();
       setToken(data.access_token);
       setUser(data.user);
       localStorage.setItem(AUTH_TOKEN_KEY, data.access_token);
@@ -81,12 +88,19 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ email, password, name }),
       });
 
+      const text = await res.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        console.error('Failed to parse response:', text);
+        throw new Error('Server error - please try again');
+      }
+
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.detail || 'Registration failed');
       }
 
-      const data = await res.json();
       setToken(data.access_token);
       setUser(data.user);
       localStorage.setItem(AUTH_TOKEN_KEY, data.access_token);

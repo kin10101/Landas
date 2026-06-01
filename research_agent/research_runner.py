@@ -197,11 +197,13 @@ class ResearchRunner:
             await self._emit_progress(EventType.LOG, message="[*] Analyzing with OpenAI...")
             await self._emit_progress(EventType.ANALYSIS_STARTED, items_to_analyze=len(all_data))
 
-            research_finding = self.analyzer.analyze_sources(
+            # Run blocking OpenAI call in thread pool to not block event loop
+            research_finding = await asyncio.to_thread(
+                self.analyzer.analyze_sources,
                 all_data,
                 self.config["research_agent"]["target_roles"],
                 research_run_id,
-                previous_discoveries=previous_discoveries,
+                previous_discoveries,
             )
 
             await self._emit_progress(
@@ -503,11 +505,14 @@ Return empty array [] if the tree is already comprehensive.
             print(f"[DEBUG] Saved skill tree input to: {debug_file}")
 
         try:
-            response = client.chat.completions.create(
-                model=model,
-                max_completion_tokens=2000,
-                messages=[{"role": "user", "content": prompt}]
-            )
+            # Run blocking OpenAI call in thread pool
+            def call_openai():
+                return client.chat.completions.create(
+                    model=model,
+                    max_completion_tokens=2000,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+            response = await asyncio.to_thread(call_openai)
 
             text = response.choices[0].message.content
             if "```json" in text:
@@ -663,11 +668,14 @@ Return ONLY valid JSON array:
 """
 
         try:
-            response = client.chat.completions.create(
-                model=model,
-                max_completion_tokens=1000,
-                messages=[{"role": "user", "content": prompt}]
-            )
+            # Run blocking OpenAI call in thread pool
+            def call_openai():
+                return client.chat.completions.create(
+                    model=model,
+                    max_completion_tokens=1000,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+            response = await asyncio.to_thread(call_openai)
 
             text = response.choices[0].message.content
             if "```json" in text:

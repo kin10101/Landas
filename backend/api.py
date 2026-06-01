@@ -272,12 +272,14 @@ IMPORTANT: Only include real, existing resources with valid URLs. Common good so
 """
 
     try:
-        response = client.chat.completions.create(
-            model=model,
-            max_tokens=2000,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.4
-        )
+        # Run blocking OpenAI call in thread pool
+        def call_openai():
+            return client.chat.completions.create(
+                model=model,
+                max_completion_tokens=2000,
+                messages=[{"role": "user", "content": prompt}]
+            )
+        response = await asyncio.to_thread(call_openai)
 
         text = response.choices[0].message.content
         if "```json" in text:
@@ -407,6 +409,8 @@ def get_tree(role_id: int, current_user: dict = Depends(get_current_user)):
 @app.post("/api/tree/generate")
 async def generate_tree(request: TreeGenerateRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     """Generate a new skill tree for a role"""
+    import asyncio
+
     # Check if already exists for this user
     existing = db.get_root_nodes(user_id=current_user["id"])
     for root in existing:
@@ -414,7 +418,8 @@ async def generate_tree(request: TreeGenerateRequest, background_tasks: Backgrou
             return {"message": "Tree already exists", "id": root["id"]}
 
     generator = SkillTreeGenerator(db, user_id=current_user["id"])
-    root_id = generator.generate_tree(request.role, user_id=current_user["id"])
+    # Run blocking OpenAI call in thread pool to not block event loop
+    root_id = await asyncio.to_thread(generator.generate_tree, request.role, current_user["id"])
 
     if root_id:
         return {"message": "Tree generated", "id": root_id}
@@ -754,12 +759,14 @@ Return ONLY valid JSON array:
 """
 
     try:
-        response = client.chat.completions.create(
-            model=model,
-            max_tokens=1500,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.5
-        )
+        # Run blocking OpenAI call in thread pool
+        def call_openai():
+            return client.chat.completions.create(
+                model=model,
+                max_completion_tokens=1500,
+                messages=[{"role": "user", "content": prompt}]
+            )
+        response = await asyncio.to_thread(call_openai)
 
         text = response.choices[0].message.content
         if "```json" in text:
