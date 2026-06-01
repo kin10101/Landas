@@ -2,6 +2,7 @@ services:
   # Backend API
   - type: web
     name: landas-backend
+    plan: free
     runtime: docker
     dockerfilePath: ./Dockerfile.backend
     dockerContext: .
@@ -17,6 +18,7 @@ services:
   # Frontend
   - type: web
     name: landas-frontend
+    plan: free
     runtime: docker
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
