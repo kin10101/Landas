@@ -22,10 +22,9 @@ services:
         value: "*"
     healthCheckPath: /api/health
 
-  # Frontend (static site)
+  # Frontend (static site - served from global CDN)
   - type: web
     name: landas-frontend
-    region: singapore
     env: static
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
