@@ -74,7 +74,7 @@ const SkillTree = () => {
       );
 
       if (matchingTree) {
-        await loadTree(matchingTree.id);
+        await loadTree(Number(matchingTree.id));
       } else {
         toast.info(`Generating skill tree for ${targetRole}...`);
         const genRes = await authFetch(`${API_URL}/tree/generate`, {
@@ -84,7 +84,9 @@ const SkillTree = () => {
         });
 
         if (genRes.ok) {
-          const { id } = await genRes.json();
+          const data = await genRes.json();
+          const id = Number(data.id);
+          if (!id) throw new Error('Invalid tree ID returned from server');
           await loadTree(id);
           toast.success(`Skill tree for ${targetRole} created!`);
         } else {
@@ -99,7 +101,7 @@ const SkillTree = () => {
   };
 
   const loadTree = async (treeId = currentTreeId) => {
-    if (!treeId) return;
+    if (!treeId || typeof treeId !== 'number') return;
     try {
       const res = await authFetch(`${API_URL}/tree/${treeId}`);
       if (res.ok) {

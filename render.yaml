@@ -1,0 +1,29 @@
+services:
+  # Backend API
+  - type: web
+    name: landas-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile.backend
+    dockerContext: .
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: RESEARCH_LOG_LEVEL
+        value: INFO
+    healthCheckPath: /api/health
+
+  # Frontend
+  - type: web
+    name: landas-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          name: landas-backend
+          type: web
+          property: hostport
+          prefix: https://

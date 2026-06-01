@@ -3,13 +3,13 @@
 .gitignore
 
 # Python
-__pycache__
+**/__pycache__
 *.py[cod]
 *$py.class
 *.so
 .Python
-.venv
-venv
+**/.venv
+**/venv
 ENV
 *.egg-info
 .eggs
@@ -49,3 +49,6 @@ Thumbs.db
 debug/
 research_findings_*.txt
 research_findings_*.json
+
+# Frontend (not needed for backend build)
+frontend/

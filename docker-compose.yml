@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: Dockerfile.backend
     ports:
       - "8000:8000"
     environment:
@@ -25,6 +25,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
+    environment:
+      - BACKEND_URL=http://backend:8000
     depends_on:
       - backend
     restart: unless-stopped

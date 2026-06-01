@@ -150,9 +150,8 @@ Be comprehensive but concise. Focus on practical, actionable insights.
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
-                max_tokens=4096,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7
+                max_completion_tokens=4096,
+                messages=[{"role": "user", "content": prompt}]
             )
 
             # Extract text from response

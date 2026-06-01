@@ -112,15 +112,18 @@ Make sure the tree is:
 Generate the tree for: {role}
 """
 
+        json_str = ""
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
-                max_tokens=4096,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7
+                max_completion_tokens=16000,
+                messages=[{"role": "user", "content": prompt}]
             )
 
             text = response.choices[0].message.content
+            if not text:
+                print(f"[!] Model returned empty response for role: {role}")
+                return None
 
             # Extract JSON
             if "```json" in text:
@@ -132,6 +135,13 @@ Generate the tree for: {role}
 
             return json.loads(json_str)
 
+        except json.JSONDecodeError as e:
+            print(f"[!] JSON parse error: {str(e)}")
+            print(f"[!] Error at position {e.pos}, showing context:")
+            start = max(0, e.pos - 100)
+            end = min(len(json_str), e.pos + 100)
+            print(f"[!] ...{json_str[start:end]}...")
+            return None
         except Exception as e:
             print(f"[!] Error generating tree structure: {str(e)}")
             return None

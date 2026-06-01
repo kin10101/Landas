@@ -505,9 +505,8 @@ Return empty array [] if the tree is already comprehensive.
         try:
             response = client.chat.completions.create(
                 model=model,
-                max_tokens=2000,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.4
+                max_completion_tokens=2000,
+                messages=[{"role": "user", "content": prompt}]
             )
 
             text = response.choices[0].message.content
@@ -666,9 +665,8 @@ Return ONLY valid JSON array:
         try:
             response = client.chat.completions.create(
                 model=model,
-                max_tokens=1000,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.5
+                max_completion_tokens=1000,
+                messages=[{"role": "user", "content": prompt}]
             )
 
             text = response.choices[0].message.content
