@@ -4,6 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 from openai import OpenAI
+from langsmith.wrappers import wrap_openai
+from langsmith import traceable
 from models import SourceData, ResearchFinding, EmergingTechnology, EstablishedTechnology, ResearchInsights, ResearchRunSummary
 
 
@@ -11,13 +13,14 @@ class AIAnalyzer:
     """Analyzes raw source data using OpenAI API to extract meaningful insights"""
 
     def __init__(self, debug: bool = False):
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = wrap_openai(OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
         self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         self.debug = debug
         self.debug_dir = Path(__file__).parent / "debug"
         if self.debug:
             self.debug_dir.mkdir(exist_ok=True)
 
+    @traceable(name="analyze_sources")
     def analyze_sources(
         self, source_data: List[SourceData], target_roles: List[str], research_run_id: str,
         previous_discoveries: List[dict] = None

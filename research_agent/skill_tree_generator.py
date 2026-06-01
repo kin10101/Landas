@@ -10,6 +10,8 @@ import os
 import sys
 from typing import List, Optional
 from openai import OpenAI
+from langsmith.wrappers import wrap_openai
+from langsmith import traceable
 
 # Handle imports for both direct execution and import from other modules
 try:
@@ -22,7 +24,7 @@ class SkillTreeGenerator:
     """Generates complete skill trees for career roles"""
 
     def __init__(self, db: Database, user_id: int = 1):
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = wrap_openai(OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
         self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         self.db = db
         self.user_id = user_id
@@ -51,6 +53,7 @@ class SkillTreeGenerator:
         print(f"[+] Skill tree generated with root ID: {root_id}")
         return root_id
 
+    @traceable(name="generate_tree_structure")
     def _generate_structure(self, role: str) -> dict:
         """Use OpenAI to generate the tree structure"""
 

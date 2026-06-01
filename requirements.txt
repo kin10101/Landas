@@ -1,4 +1,5 @@
 openai>=1.40.0
+langsmith>=0.1.0
 httpx>=0.26.0
 pydantic>=2.5.0
 pyyaml>=6.0

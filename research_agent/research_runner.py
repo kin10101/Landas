@@ -4,6 +4,7 @@ import uuid
 from typing import List, Tuple, Optional
 from datetime import datetime
 import yaml
+from langsmith import traceable
 
 try:
     from .sources.hackernews import HackerNewsSource
@@ -331,11 +332,13 @@ class ResearchRunner:
         except Exception as e:
             print(f"[!] Database save error: {str(e)}")
 
+    @traceable(name="add_to_skill_tree")
     async def _add_to_skill_tree(self, finding) -> List[dict]:
         """Add discovered technologies and identify missing skills for the target roles."""
         import json
         import os
         from openai import OpenAI
+        from langsmith.wrappers import wrap_openai
 
         added_nodes = []
 
@@ -383,7 +386,7 @@ class ResearchRunner:
         print(f"[DEBUG] Existing skills in tree: {len(existing_names)}")
         await self._emit_progress(EventType.LOG, message=f"[DEBUG] Existing skills in tree: {len(existing_names)}")
 
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        client = wrap_openai(OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
         model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
         # Collect all relevant technologies
@@ -627,6 +630,7 @@ Return empty array [] if the tree is already comprehensive.
 
         return added_nodes
 
+    @traceable(name="fetch_and_add_resources")
     async def _fetch_and_add_resources(self, node_id: int, skill_name: str, client, model: str) -> int:
         """Fetch learning resources for a skill and add them to the database."""
         import json
